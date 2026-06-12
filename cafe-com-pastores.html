@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Café com Pastores — Inscrição</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Arial Black',Arial,sans-serif;background:#0a0a0a;color:#fff;min-height:100vh;}
+  .header{background:#0a0a0a;position:relative;overflow:hidden;padding:28px 32px 24px;}
+  .header::after{content:'';position:absolute;top:0;right:0;width:0;height:0;border-style:solid;border-width:0 200px 150px 0;border-color:transparent #00C0F3 transparent transparent;}
+  .header::before{content:'';position:absolute;top:0;right:0;width:0;height:0;border-style:solid;border-width:0 68px 55px 0;border-color:transparent #E8E219 transparent transparent;z-index:2;}
+  .header-inner{display:flex;align-items:flex-start;gap:18px;position:relative;z-index:1;}
+  .logo-wrap{flex-shrink:0;width:72px;height:72px;background:#fff;border-radius:14px;display:flex;align-items:center;justify-content:center;padding:5px;}
+  .pill{display:inline-block;border:1.5px solid #E8E219;border-radius:20px;padding:3px 14px;font-size:10px;color:#E8E219;letter-spacing:1px;margin-bottom:8px;}
+  .t-cafe{font-size:48px;color:#E8E219;letter-spacing:-2px;line-height:1;}
+  .t-com{font-size:13px;color:#fff;font-weight:400;letter-spacing:3px;margin:2px 0;}
+  .t-pastores{font-size:42px;color:#E8E219;font-style:italic;letter-spacing:-2px;line-height:1;}
+  .t-sub{color:#aaa;font-size:12px;font-weight:400;margin-top:5px;}
+  .steps-bar{display:flex;background:#111;border-top:1px solid #222;}
+  .step-tab{flex:1;padding:13px 8px;text-align:center;font-size:11px;font-weight:900;letter-spacing:1px;color:#555;border-bottom:3px solid transparent;transition:all .2s;}
+  .step-tab.active{color:#E8E219;border-bottom-color:#E8E219;}
+  .step-tab.done{color:#00C0F3;border-bottom-color:#00C0F3;}
+  .section{display:none;padding:24px 32px 32px;}
+  .section.visible{display:block;}
+  .sec-label{font-size:10px;letter-spacing:2px;color:#00C0F3;font-weight:900;margin-bottom:8px;margin-top:20px;}
+  .sec-label:first-child{margin-top:0;}
+  .field{width:100%;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.15);border-radius:10px;padding:13px 16px;color:#fff;font-size:14px;font-family:Arial,sans-serif;outline:none;transition:border-color .18s;-webkit-appearance:none;appearance:none;}
+  .field:focus{border-color:#00C0F3;}
+  .field::placeholder{color:rgba(255,255,255,0.4);}
+  .field.error{border-color:#E83A3A;}
+  .mt{margin-top:10px;}
+  .err-msg{color:#E83A3A;font-size:11px;font-weight:400;font-family:Arial,sans-serif;margin-top:5px;display:none;}
+  .err-msg.show{display:block;}
+  .radio-group{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .radio-opt{border:1.5px solid rgba(255,255,255,0.15);border-radius:10px;padding:14px 16px;cursor:pointer;transition:all .18s;background:rgba(255,255,255,0.04);display:flex;align-items:center;gap:12px;user-select:none;}
+  .radio-opt:hover{border-color:#00C0F3;background:rgba(0,192,243,0.07);}
+  .radio-opt.selected{border-color:#E8E219;background:rgba(232,226,25,0.09);}
+  .r-circle{width:20px;height:20px;border-radius:50%;border:2px solid rgba(255,255,255,0.3);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .18s;}
+  .radio-opt.selected .r-circle{border-color:#E8E219;background:#E8E219;}
+  .r-dot{width:8px;height:8px;border-radius:50%;background:#0a0a0a;display:none;}
+  .radio-opt.selected .r-dot{display:block;}
+  .r-label{font-size:14px;font-weight:900;color:#fff;}
+  .r-sub{font-size:11px;color:#aaa;font-weight:400;font-family:Arial,sans-serif;margin-top:2px;}
+  .divider{height:0.5px;background:rgba(255,255,255,0.1);margin:22px 0;}
+  .bottom-bar{background:#E8E219;padding:14px 32px;display:flex;align-items:center;justify-content:space-between;margin:0 -32px -32px;}
+  .bottom-label{font-size:10px;color:#0a0a0a;font-weight:900;letter-spacing:2px;}
+  .btn{background:#0a0a0a;color:#E8E219;border:none;border-radius:8px;padding:11px 26px;font-size:13px;font-weight:900;font-family:'Arial Black',Arial;cursor:pointer;letter-spacing:1px;transition:all .18s;}
+  .btn:hover{background:#1a1a1a;transform:scale(1.03);}
+  .btn:active{transform:scale(0.97);}
+  .btn-ghost{background:rgba(0,0,0,0.18);color:#0a0a0a;border:none;border-radius:8px;padding:11px 20px;font-size:12px;font-weight:900;font-family:'Arial Black',Arial;cursor:pointer;transition:all .18s;}
+  .btn-ghost:hover{background:rgba(0,0,0,0.28);}
+  .counter-bar{background:#111;border:1.5px solid rgba(255,255,255,0.1);border-radius:10px;padding:11px 16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+  .counter-bar span{font-size:13px;font-weight:400;font-family:Arial,sans-serif;color:#aaa;}
+  .counter-val{font-size:16px;font-weight:900;color:#E8E219;}
+  .themes-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .theme-opt{border:1.5px solid rgba(255,255,255,0.12);border-radius:10px;padding:12px 14px;cursor:pointer;transition:all .18s;background:rgba(255,255,255,0.03);display:flex;align-items:center;gap:10px;user-select:none;}
+  .theme-opt:hover{border-color:#00C0F3;background:rgba(0,192,243,0.07);}
+  .theme-opt.selected{border-color:#E8E219;background:rgba(232,226,25,0.09);}
+  .theme-opt.disabled{opacity:.35;cursor:not-allowed;border-color:rgba(255,255,255,0.08);}
+  .theme-opt.disabled:hover{border-color:rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);}
+  .chk-box{width:18px;height:18px;border-radius:5px;border:2px solid rgba(255,255,255,0.25);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .18s;}
+  .theme-opt.selected .chk-box{border-color:#E8E219;background:#E8E219;}
+  .chk-mark{display:none;font-size:12px;color:#0a0a0a;font-weight:900;}
+  .theme-opt.selected .chk-mark{display:block;}
+  .theme-name{font-size:13px;font-weight:900;color:#fff;line-height:1.3;}
+  .theme-cat{font-size:10px;color:#777;font-weight:400;margin-top:2px;}
+  .themes-error{color:#E83A3A;font-size:12px;font-family:Arial,sans-serif;margin-top:8px;display:none;}
+  .themes-error.show{display:block;}
+  .sediar-box{background:rgba(0,192,243,0.06);border:1.5px solid rgba(0,192,243,0.25);border-radius:14px;padding:18px 18px 14px;}
+  .sediar-box .sec-label{color:#E8E219;margin-top:0;margin-bottom:12px;}
+
+  /* CHART SECTION */
+  .chart-box{background:#111;border:1.5px solid rgba(255,255,255,0.08);border-radius:14px;padding:20px;margin-top:18px;}
+  .chart-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+  .chart-title{font-size:10px;letter-spacing:2px;color:#00C0F3;font-weight:900;}
+  .chart-refresh{background:rgba(0,192,243,0.12);border:1px solid rgba(0,192,243,0.3);border-radius:6px;padding:5px 12px;color:#00C0F3;font-size:11px;font-weight:900;font-family:'Arial Black',Arial;cursor:pointer;transition:all .18s;}
+  .chart-refresh:hover{background:rgba(0,192,243,0.22);}
+  .chart-loading{text-align:center;padding:24px;color:#555;font-size:12px;font-weight:400;font-family:Arial,sans-serif;}
+  .chart-wrap{position:relative;width:100%;}
+
+  /* LOADING */
+  .loading-screen{display:none;flex-direction:column;align-items:center;justify-content:center;padding:80px 32px;text-align:center;}
+  .loading-screen.visible{display:flex;}
+  .spinner{width:44px;height:44px;border:3px solid rgba(255,255,255,0.1);border-top-color:#00C0F3;border-radius:50%;animation:spin .8s linear infinite;margin-bottom:16px;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .l-txt{color:#aaa;font-size:14px;font-weight:400;font-family:Arial,sans-serif;}
+  .success-screen{display:none;flex-direction:column;align-items:center;justify-content:center;padding:60px 32px;text-align:center;}
+  .success-screen.visible{display:flex;}
+  .s-icon{width:72px;height:72px;border-radius:50%;background:#E8E219;display:flex;align-items:center;justify-content:center;margin-bottom:18px;}
+  .s-check{font-size:36px;color:#0a0a0a;font-weight:900;line-height:1;}
+  .s-name{background:rgba(0,192,243,0.15);border:1.5px solid #00C0F3;border-radius:10px;padding:12px 24px;margin:14px 0;font-size:15px;font-weight:900;color:#00C0F3;font-family:Arial,sans-serif;}
+  .s-themes-wrap{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:10px 0;}
+  .s-tag{background:rgba(232,226,25,0.12);border:1px solid #E8E219;border-radius:6px;padding:5px 12px;font-size:12px;color:#E8E219;font-family:Arial,sans-serif;}
+  .s-sub{color:#555;font-size:13px;font-weight:400;font-family:Arial,sans-serif;margin-top:12px;line-height:1.8;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="logo-wrap">
+      <svg width="62" height="62" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Blob orgânico fiel ao original: assimétrico, inclinado levemente, maior na base esquerda -->
+        <path d="
+          M58 6
+          C70 2 84 6 92 16
+          C102 14 112 24 113 36
+          C120 44 118 58 110 66
+          C116 76 112 90 102 96
+          C98 108 86 116 74 115
+          C64 120 50 118 42 110
+          C30 112 18 102 16 90
+          C6 84 2 70 8 58
+          C2 48 6 32 16 24
+          C18 12 32 4 44 5
+          C48 2 54 4 58 6Z
+        " fill="white"/>
+        <!-- Pétala CIMA: elipse vertical -->
+        <ellipse cx="60" cy="36" rx="13" ry="19" fill="white" stroke="#0d0d0d" stroke-width="7"/>
+        <!-- Pétala DIREITA: elipse horizontal -->
+        <ellipse cx="84" cy="60" rx="19" ry="13" fill="white" stroke="#0d0d0d" stroke-width="7"/>
+        <!-- Pétala BAIXO: elipse vertical -->
+        <ellipse cx="60" cy="84" rx="13" ry="19" fill="white" stroke="#0d0d0d" stroke-width="7"/>
+        <!-- Pétala ESQUERDA: elipse horizontal -->
+        <ellipse cx="36" cy="60" rx="19" ry="13" fill="white" stroke="#0d0d0d" stroke-width="7"/>
+        <!-- Losango central -->
+        <rect x="52" y="52" width="16" height="16" rx="1.5" transform="rotate(45 60 60)" fill="white" stroke="#0d0d0d" stroke-width="6"/>
+      </svg>
+    </div>
+    <div>
+      <div class="pill">REDE INSPIRE</div>
+      <div class="t-cafe">CAFÉ</div>
+      <div class="t-com">com</div>
+      <div class="t-pastores">pastores</div>
+      <div class="t-sub">• Inscrição e votação de tema</div>
+    </div>
+  </div>
+</div>
+
+<div class="steps-bar">
+  <div class="step-tab active" id="tab1">👤 INSCRIÇÃO</div>
+  <div class="step-tab" id="tab2">✓ VOTAÇÃO</div>
+</div>
+
+<!-- STEP 1 -->
+<div id="step1" class="section visible">
+  <div class="sec-label">NOME</div>
+  <input class="field" id="nome" type="text" placeholder="Digite seu nome completo" autocomplete="off">
+  <div class="err-msg" id="err-nome">Por favor, informe seu nome completo.</div>
+
+  <div class="sec-label">WHATSAPP</div>
+  <input class="field" id="whatsapp" type="text" placeholder="(00) 00000-0000" autocomplete="off" maxlength="15">
+  <div class="err-msg" id="err-whatsapp">Por favor, informe seu WhatsApp com DDD.</div>
+
+  <div class="sec-label">NOME DA SUA IGREJA</div>
+  <input class="field" id="igreja" type="text" placeholder="Digite o nome da sua igreja" autocomplete="off">
+  <div class="err-msg" id="err-igreja">Por favor, informe o nome da sua igreja.</div>
+
+  <div class="sec-label">FUNÇÃO</div>
+  <input class="field" id="funcao" type="text" placeholder="Digite sua função na igreja" autocomplete="off">
+  <div class="err-msg" id="err-funcao">Por favor, informe sua função.</div>
+
+  <div class="sec-label">SUA IGREJA JÁ É FILIADA À REDE INSPIRE?</div>
+  <div class="radio-group">
+    <div class="radio-opt" id="r-sim" onclick="selectFiliada('sim')">
+      <div class="r-circle"><div class="r-dot"></div></div>
+      <div><div class="r-label">Sim</div><div class="r-sub">Já somos filiados</div></div>
+    </div>
+    <div class="radio-opt" id="r-nao" onclick="selectFiliada('nao')">
+      <div class="r-circle"><div class="r-dot"></div></div>
+      <div><div class="r-label">Não</div><div class="r-sub">Ainda não somos filiados</div></div>
+    </div>
+  </div>
+  <div class="err-msg" id="err-filiada">Por favor, selecione uma opção.</div>
+
+  <div class="divider"></div>
+  <div class="bottom-bar">
+    <span class="bottom-label">REDE INSPIRE • RJ</span>
+    <button class="btn" onclick="goStep2()">PRÓXIMO: VOTAÇÃO →</button>
+  </div>
+</div>
+
+<!-- STEP 2 -->
+<div id="step2" class="section">
+  <div class="sec-label">ESCOLHA OS TEMAS</div>
+  <div class="counter-bar">
+    <span>Selecione até <strong style="color:#fff;">5 temas</strong> para o próximo encontro</span>
+    <span class="counter-val"><span id="count">0</span>/5</span>
+  </div>
+
+  <div class="sec-label" style="margin-top:0;">COMUNHÃO</div>
+  <div class="themes-grid">
+    <div class="theme-opt" data-theme="Recomeço" onclick="toggleTheme(this)"><div class="chk-box"><span class="chk-mark">✓</span></div><div><div class="theme-name">Recomeço</div><div class="theme-cat">Comunhão</div></div></div>
+    <div class="theme-opt" data-theme="Primeira Vez" onclick="toggleTheme(this)"><div class="chk-box"><span class="chk-mark">✓</span></div><div><div class="theme-name">Primeira Vez</div><div class="theme-cat">Comunhão</div></div></div>
+    <div class="theme-opt" data-theme="Vida Nova" onclick="toggleTheme(this)"><div class="chk-box"><span class="chk-mark">✓</span></div><div><div class="theme-name">Vida Nova</div><div class="theme-cat">Comunhão</div></div></div>
+    <div class="theme-opt" data-theme="Bem Vindo à Família" onclick="toggleTheme(this)"><div class="chk-box"><span class="chk-mark">✓</span></div><div><div class="theme-name">Bem Vindo à Família</div><div class="theme-cat">Comunhão</div></div></div>
+    <div class="theme-opt" data-theme="Ministério Inclusão" onclick="toggleTheme(this)"><div class="chk-box"><span class="chk-mark">✓</span></div><div><div class="theme-name">Ministério Inclusão</div><div class="theme-cat">Comunhão</div></div></div>
+    <div class="theme-opt" data-theme="Hospitalidade" onclick="toggleTheme(this)"><div class="chk-box"><span class="chk-mark">✓</span></div><div><div class="theme-name">Hospitalidade</div><div class="theme-cat">Comunhão</div></div></div>
+  </div>
+
+  <div class="sec-label">DISCIPULADO</div>
+  <div class="themes-grid">
+    <div class="theme-opt" data-theme="30 Semanas" onclick="toggleTheme(this)"><div class="chk-box"><span class="chk-mark">✓</span></div><div><div class="theme-name">30 Semanas</div><div class="theme-cat">Discipulado</div></div></div>
+    <div class="theme-opt" data-theme="Restauração" onclick="toggleTheme(this)"><div class="chk-box"><span class="chk-mark">✓</span></div><div><div class="theme-name">Restauração</div><div class="theme-cat">Discipulado</div></div></div>
+    <div class="theme-opt" data-theme="Retiro HH" onclick="toggleTheme(this)"><div class="chk-box"><span class="chk-mark">✓</span></div><div><div class="theme-name">Retiro HH</div><div class="theme-cat">Discipulado</div></div></div>
+    <div class="theme-opt" data-theme="Retiro Feminina" onclick="toggleTheme(this)"><div class="chk-box"><span class="chk-mark">✓</span></div><div><div class="theme-name">Retiro Feminina</div><div class="theme-cat">Discipulado</div></div></div>
+    <div class="theme-opt" data-theme="Cursos em Geral" onclick="toggleTheme(this)"><div class="chk-box"><span class="chk-mark">✓</span></div><div><div class="theme-name">Cursos em Geral</div><div class="theme-cat">Discipulado</div></div></div>
+    <div class="theme-opt" data-theme="Rede GDCs" onclick="toggleTheme(this)"><div class="chk-box"><span class="chk-mark">✓</span></div><div><div class="theme-name">Rede GDCs</div><div class="theme-cat">Discipulado</div></div></div>
+  </div>
+
+  <div class="sec-label">SERVIÇO</div>
+  <div class="themes-grid">
+    <div class="theme-opt" data-theme="Boas Vindas" onclick="toggleTheme(this)"><div class="chk-box"><span class="chk-mark">✓</span></div><div><div class="theme-name">Boas Vindas</div><div class="theme-cat">Serviço</div></div></div>
+    <div class="theme-opt" data-theme="Celebração Operacional" onclick="toggleTheme(this)"><div class="chk-box"><span class="chk-mark">✓</span></div><div><div class="theme-name">Celebração Operacional</div><div class="theme-cat">Serviço</div></div></div>
+    <div class="theme-opt" data-theme="Gestão de Voluntário" onclick="toggleTheme(this)"><div class="chk-box"><span class="chk-mark">✓</span></div><div><div class="theme-name">Gestão de Voluntário</div><div class="theme-cat">Serviço</div></div></div>
+    <div class="theme-opt" data-theme="Guardiões" onclick="toggleTheme(this)"><div class="chk-box"><span class="chk-mark">✓</span></div><div><div class="theme-name">Guardiões</div><div class="theme-cat">Serviço</div></div></div>
+    <div class="theme-opt" data-theme="Pit Stop Ministerial" onclick="toggleTheme(this)"><div class="chk-box"><span class="chk-mark">✓</span></div><div><div class="theme-name">Pit Stop Ministerial</div><div class="theme-cat">Serviço</div></div></div>
+    <div class="theme-opt" data-theme="Recepção" onclick="toggleTheme(this)"><div class="chk-box"><span class="chk-mark">✓</span></div><div><div class="theme-name">Recepção</div><div class="theme-cat">Serviço</div></div></div>
+    <div class="theme-opt" data-theme="Resposta Solidária" onclick="toggleTheme(this)"><div class="chk-box"><span class="chk-mark">✓</span></div><div><div class="theme-name">Resposta Solidária</div><div class="theme-cat">Serviço</div></div></div>
+    <div class="theme-opt" data-theme="Saúde" onclick="toggleTheme(this)"><div class="chk-box"><span class="chk-mark">✓</span></div><div><div class="theme-name">Saúde</div><div class="theme-cat">Serviço</div></div></div>
+    <div class="theme-opt" data-theme="Trânsito" onclick="toggleTheme(this)"><div class="chk-box"><span class="chk-mark">✓</span></div><div><div class="theme-name">Trânsito</div><div class="theme-cat">Serviço</div></div></div>
+    <div class="theme-opt" data-theme="Dízimos, Ofertas e Primícias" onclick="toggleTheme(this)"><div class="chk-box"><span class="chk-mark">✓</span></div><div><div class="theme-name">Dízimos, Ofertas e Primícias</div><div class="theme-cat">Serviço</div></div></div>
+  </div>
+
+  <div class="sec-label">ADORAÇÃO</div>
+  <div class="themes-grid">
+    <div class="theme-opt" data-theme="Teatro" onclick="toggleTheme(this)"><div class="chk-box"><span class="chk-mark">✓</span></div><div><div class="theme-name">Teatro</div><div class="theme-cat">Adoração</div></div></div>
+    <div class="theme-opt" data-theme="Fotografia" onclick="toggleTheme(this)"><div class="chk-box"><span class="chk-mark">✓</span></div><div><div class="theme-name">Fotografia</div><div class="theme-cat">Adoração</div></div></div>
+    <div class="theme-opt" data-theme="Movimento (Dança)" onclick="toggleTheme(this)"><div class="chk-box"><span class="chk-mark">✓</span></div><div><div class="theme-name">Movimento (Dança)</div><div class="theme-cat">Adoração</div></div></div>
+    <div class="theme-opt" data-theme="Cenografia" onclick="toggleTheme(this)"><div class="chk-box"><span class="chk-mark">✓</span></div><div><div class="theme-name">Cenografia</div><div class="theme-cat">Adoração</div></div></div>
+    <div class="theme-opt" data-theme="Intercessão" onclick="toggleTheme(this)"><div class="chk-box"><span class="chk-mark">✓</span></div><div><div class="theme-name">Intercessão</div><div class="theme-cat">Adoração</div></div></div>
+    <div class="theme-opt" data-theme="Coral" onclick="toggleTheme(this)"><div class="chk-box"><span class="chk-mark">✓</span></div><div><div class="theme-name">Coral</div><div class="theme-cat">Adoração</div></div></div>
+    <div class="theme-opt" data-theme="Comunicação" onclick="toggleTheme(this)"><div class="chk-box"><span class="chk-mark">✓</span></div><div><div class="theme-name">Comunicação</div><div class="theme-cat">Adoração</div></div></div>
+    <div class="theme-opt" data-theme="Bandas e Backings" onclick="toggleTheme(this)"><div class="chk-box"><span class="chk-mark">✓</span></div><div><div class="theme-name">Bandas e Backings</div><div class="theme-cat">Adoração</div></div></div>
+    <div class="theme-opt" data-theme="Despertar das Artes" onclick="toggleTheme(this)"><div class="chk-box"><span class="chk-mark">✓</span></div><div><div class="theme-name">Despertar das Artes</div><div class="theme-cat">Adoração</div></div></div>
+    <div class="theme-opt" data-theme="Multimídia" onclick="toggleTheme(this)"><div class="chk-box"><span class="chk-mark">✓</span></div><div><div class="theme-name">Multimídia</div><div class="theme-cat">Adoração</div></div></div>
+    <div class="theme-opt" data-theme="Som (Técnica)" onclick="toggleTheme(this)"><div class="chk-box"><span class="chk-mark">✓</span></div><div><div class="theme-name">Som (Técnica)</div><div class="theme-cat">Adoração</div></div></div>
+    <div class="theme-opt" data-theme="Lapidar" onclick="toggleTheme(this)"><div class="chk-box"><span class="chk-mark">✓</span></div><div><div class="theme-name">Lapidar</div><div class="theme-cat">Adoração</div></div></div>
+  </div>
+
+  <div class="sec-label">MISSÕES</div>
+  <div class="themes-grid">
+    <div class="theme-opt" data-theme="Ação Social" onclick="toggleTheme(this)"><div class="chk-box"><span class="chk-mark">✓</span></div><div><div class="theme-name">Ação Social</div><div class="theme-cat">Missões</div></div></div>
+    <div class="theme-opt" data-theme="Capelania Hospitalar" onclick="toggleTheme(this)"><div class="chk-box"><span class="chk-mark">✓</span></div><div><div class="theme-name">Capelania Hospitalar</div><div class="theme-cat">Missões</div></div></div>
+    <div class="theme-opt" data-theme="Capelania Prisional" onclick="toggleTheme(this)"><div class="chk-box"><span class="chk-mark">✓</span></div><div><div class="theme-name">Capelania Prisional</div><div class="theme-cat">Missões</div></div></div>
+    <div class="theme-opt" data-theme="Cidade Sports" onclick="toggleTheme(this)"><div class="chk-box"><span class="chk-mark">✓</span></div><div><div class="theme-name">Cidade Sports</div><div class="theme-cat">Missões</div></div></div>
+    <div class="theme-opt" data-theme="Evangelismo" onclick="toggleTheme(this)"><div class="chk-box"><span class="chk-mark">✓</span></div><div><div class="theme-name">Evangelismo</div><div class="theme-cat">Missões</div></div></div>
+  </div>
+
+  <div class="themes-error" id="err-themes">Selecione pelo menos 1 tema para continuar.</div>
+  <div class="divider"></div>
+
+  <!-- SEDIAR -->
+  <div class="sediar-box">
+    <div class="sec-label">GOSTARIA DE SEDIAR UM DE NOSSOS ENCONTROS EM SUA IGREJA?</div>
+    <div class="radio-group">
+      <div class="radio-opt" id="s-sim" onclick="selectSediar('sim')">
+        <div class="r-circle"><div class="r-dot"></div></div>
+        <div><div class="r-label">Sim</div><div class="r-sub">Tenho interesse</div></div>
+      </div>
+      <div class="radio-opt" id="s-nao" onclick="selectSediar('nao')">
+        <div class="r-circle"><div class="r-dot"></div></div>
+        <div><div class="r-label">Estou me planejando</div><div class="r-sub">Quem sabe em breve</div></div>
+      </div>
+    </div>
+    <div class="err-msg" id="err-sediar">Por favor, selecione uma opção.</div>
+  </div>
+
+  <!-- GRÁFICO -->
+  <div class="chart-box">
+    <div class="chart-header">
+      <span class="chart-title">RESULTADO DA VOTAÇÃO EM TEMPO REAL</span>
+      <button class="chart-refresh" onclick="loadChart()">↻ ATUALIZAR</button>
+    </div>
+    <div id="chart-loading" class="chart-loading">Carregando dados da votação...</div>
+    <div class="chart-wrap" id="chart-wrap" style="display:none;">
+      <canvas id="votacaoChart"></canvas>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+  <div class="bottom-bar">
+    <button class="btn-ghost" onclick="backStep1()">← VOLTAR</button>
+    <span class="bottom-label">REDE INSPIRE • RJ</span>
+    <button class="btn" onclick="enviar()">ENVIAR ✉</button>
+  </div>
+</div>
+
+<!-- LOADING -->
+<div class="loading-screen" id="loading">
+  <div class="spinner"></div>
+  <div class="l-txt">Enviando sua inscrição...</div>
+</div>
+
+<!-- SUCCESS -->
+<div class="success-screen" id="success">
+  <div class="s-icon"><div class="s-check">✓</div></div>
+  <div class="t-cafe" style="font-size:28px;">Inscrição confirmada!</div>
+  <div class="s-name" id="s-nome-display"></div>
+  <div class="t-sub" style="color:#aaa;font-size:13px;margin-bottom:10px;">Temas votados:</div>
+  <div class="s-themes-wrap" id="s-themes-display"></div>
+  <div class="s-sub">Obrigado pela sua participação, pastor(a).<br>Nos vemos no próximo Café com Pastores!</div>
+</div>
+
+<script>
+  const ENDPOINT = 'https://script.google.com/macros/s/AKfycbyaNJ4nJSRlLUhKqu0dU3p9GiAyExbp9aFmXGnw23JNxpwFQ9x4A4wiE26NdZG4dZ_r5w/exec';
+  let selectedThemes = [], filiada = '', sediar = '', chartInstance = null;
+
+  // WhatsApp mask
+  document.getElementById('whatsapp').addEventListener('input', function(e) {
+    let v = e.target.value.replace(/\D/g,'');
+    if (v.length > 11) v = v.slice(0,11);
+    if (!v.length) { e.target.value = ''; return; }
+    if (v.length <= 2)       e.target.value = '(' + v;
+    else if (v.length <= 6)  e.target.value = '(' + v.slice(0,2) + ') ' + v.slice(2);
+    else if (v.length <= 10) e.target.value = '(' + v.slice(0,2) + ') ' + v.slice(2,6) + '-' + v.slice(6);
+    else                     e.target.value = '(' + v.slice(0,2) + ') ' + v.slice(2,7) + '-' + v.slice(7);
+  });
+
+  function showErr(id, s){ document.getElementById(id).classList.toggle('show',s); }
+  function setErr(id, s){ document.getElementById(id).classList.toggle('error',s); }
+
+  function selectFiliada(v){
+    filiada=v;
+    document.getElementById('r-sim').classList.toggle('selected',v==='sim');
+    document.getElementById('r-nao').classList.toggle('selected',v==='nao');
+    showErr('err-filiada',false);
+  }
+  function selectSediar(v){
+    sediar=v;
+    document.getElementById('s-sim').classList.toggle('selected',v==='sim');
+    document.getElementById('s-nao').classList.toggle('selected',v==='nao');
+    showErr('err-sediar',false);
+  }
+
+  function goStep2(){
+    let ok=true;
+    const nome=document.getElementById('nome').value.trim();
+    const wp=document.getElementById('whatsapp').value.replace(/\D/g,'');
+    const ig=document.getElementById('igreja').value.trim();
+    const fn=document.getElementById('funcao').value.trim();
+    if(!nome){setErr('nome',true);showErr('err-nome',true);ok=false;}else{setErr('nome',false);showErr('err-nome',false);}
+    if(wp.length<10){setErr('whatsapp',true);showErr('err-whatsapp',true);ok=false;}else{setErr('whatsapp',false);showErr('err-whatsapp',false);}
+    if(!ig){setErr('igreja',true);showErr('err-igreja',true);ok=false;}else{setErr('igreja',false);showErr('err-igreja',false);}
+    if(!fn){setErr('funcao',true);showErr('err-funcao',true);ok=false;}else{setErr('funcao',false);showErr('err-funcao',false);}
+    if(!filiada){showErr('err-filiada',true);ok=false;}else{showErr('err-filiada',false);}
+    if(!ok)return;
+    document.getElementById('step1').classList.remove('visible');
+    document.getElementById('step2').classList.add('visible');
+    document.getElementById('tab1').classList.remove('active');
+    document.getElementById('tab1').classList.add('done');
+    document.getElementById('tab2').classList.add('active');
+    window.scrollTo(0,0);
+    loadChart();
+  }
+
+  function backStep1(){
+    document.getElementById('step2').classList.remove('visible');
+    document.getElementById('step1').classList.add('visible');
+    document.getElementById('tab2').classList.remove('active');
+    document.getElementById('tab1').classList.remove('done');
+    document.getElementById('tab1').classList.add('active');
+    window.scrollTo(0,0);
+  }
+
+  function toggleTheme(el){
+    if(el.classList.contains('disabled')&&!el.classList.contains('selected'))return;
+    if(el.classList.contains('selected')){
+      el.classList.remove('selected');
+      selectedThemes=selectedThemes.filter(t=>t!==el.dataset.theme);
+    }else{
+      if(selectedThemes.length>=5)return;
+      el.classList.add('selected');
+      selectedThemes.push(el.dataset.theme);
+    }
+    document.getElementById('count').textContent=selectedThemes.length;
+    document.querySelectorAll('.theme-opt').forEach(o=>{
+      if(!o.classList.contains('selected')) o.classList.toggle('disabled',selectedThemes.length>=5);
+    });
+    if(selectedThemes.length>0) document.getElementById('err-themes').classList.remove('show');
+  }
+
+  // Load chart from Apps Script GET endpoint
+  async function loadChart(){
+    document.getElementById('chart-loading').style.display='block';
+    document.getElementById('chart-wrap').style.display='none';
+    try {
+      const res = await fetch(ENDPOINT + '?action=votos');
+      const data = await res.json();
+      renderChart(data);
+    } catch(e) {
+      document.getElementById('chart-loading').textContent='Não foi possível carregar os dados. Tente atualizar.';
+    }
+  }
+
+  function renderChart(data){
+    document.getElementById('chart-loading').style.display='none';
+    document.getElementById('chart-wrap').style.display='block';
+
+    // Sort descending, take top 15
+    const sorted = Object.entries(data).sort((a,b)=>b[1]-a[1]).slice(0,15);
+    const labels = sorted.map(x=>x[0]);
+    const values = sorted.map(x=>x[1]);
+
+    const colors = labels.map((_,i)=>{
+      const palette = ['#E8E219','#00C0F3','#ffffff','#E8E219','#00C0F3','#aaaaaa'];
+      return palette[i % palette.length];
+    });
+
+    const ctx = document.getElementById('votacaoChart').getContext('2d');
+    if(chartInstance){ chartInstance.destroy(); }
+
+    chartInstance = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets:[{
+          data: values,
+          backgroundColor: colors,
+          borderColor: colors,
+          borderWidth: 0,
+          borderRadius: 6,
+          borderSkipped: false,
+        }]
+      },
+      options:{
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins:{
+          legend:{ display:false },
+          tooltip:{
+            backgroundColor:'#1a1a1a',
+            titleColor:'#E8E219',
+            bodyColor:'#fff',
+            borderColor:'rgba(255,255,255,0.1)',
+            borderWidth:1,
+            callbacks:{
+              label: ctx => ' ' + ctx.raw + ' voto' + (ctx.raw===1?'':'s')
+            }
+          }
+        },
+        scales:{
+          x:{
+            grid:{ color:'rgba(255,255,255,0.05)' },
+            ticks:{ color:'#aaa', font:{ size:11 }, stepSize:1 },
+            border:{ color:'rgba(255,255,255,0.1)' }
+          },
+          y:{
+            grid:{ display:false },
+            ticks:{ color:'#fff', font:{ size:11, weight:'bold' } },
+            border:{ color:'rgba(255,255,255,0.1)' }
+          }
+        }
+      }
+    });
+
+    // Set canvas height dynamically
+    document.getElementById('votacaoChart').style.height = (labels.length * 38 + 20) + 'px';
+    document.getElementById('chart-wrap').style.height = (labels.length * 38 + 20) + 'px';
+    chartInstance.resize();
+  }
+
+  async function enviar(){
+    let ok=true;
+    if(selectedThemes.length===0){document.getElementById('err-themes').classList.add('show');ok=false;}else{document.getElementById('err-themes').classList.remove('show');}
+    if(!sediar){showErr('err-sediar',true);ok=false;}else{showErr('err-sediar',false);}
+    if(!ok)return;
+
+    const payload={
+      nome: document.getElementById('nome').value.trim(),
+      whatsapp: document.getElementById('whatsapp').value.trim(),
+      igreja: document.getElementById('igreja').value.trim(),
+      funcao: document.getElementById('funcao').value.trim(),
+      filiada: filiada==='sim'?'Sim':'Não',
+      temas: selectedThemes.join(', '),
+      sediar: sediar==='sim'?'Sim':'Estou me planejando',
+      timestamp: new Date().toLocaleString('pt-BR')
+    };
+
+    document.getElementById('step2').classList.remove('visible');
+    document.getElementById('loading').classList.add('visible');
+    document.getElementById('tab2').classList.remove('active');
+    document.getElementById('tab2').classList.add('done');
+    window.scrollTo(0,0);
+
+    try{
+      await fetch(ENDPOINT,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    }catch(e){}
+
+    document.getElementById('loading').classList.remove('visible');
+    document.getElementById('s-nome-display').textContent=payload.nome+' — '+payload.funcao+' · '+payload.igreja;
+    const tc=document.getElementById('s-themes-display');
+    tc.innerHTML='';
+    selectedThemes.forEach(t=>{
+      const tag=document.createElement('div');
+      tag.className='s-tag';
+      tag.textContent=t;
+      tc.appendChild(tag);
+    });
+    document.getElementById('success').classList.add('visible');
+    window.scrollTo(0,0);
+  }
+</script>
+</body>
+</html>
