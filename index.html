@@ -6,131 +6,203 @@
 <title>Café com Pastores — Inscrição</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
-  *{box-sizing:border-box;margin:0;padding:0;}
-  body{font-family:'Arial Black',Arial,sans-serif;background:#0a0a0a;color:#fff;min-height:100vh;}
-  .header{background:#0a0a0a;position:relative;overflow:hidden;padding:28px 32px 24px;}
-  .header::after{content:'';position:absolute;top:0;right:0;width:0;height:0;border-style:solid;border-width:0 200px 150px 0;border-color:transparent #00C0F3 transparent transparent;}
-  .header::before{content:'';position:absolute;top:0;right:0;width:0;height:0;border-style:solid;border-width:0 68px 55px 0;border-color:transparent #E8E219 transparent transparent;z-index:2;}
-  .header-inner{display:flex;align-items:flex-start;gap:18px;position:relative;z-index:1;}
-  .logo-wrap{flex-shrink:0;width:72px;height:72px;background:#fff;border-radius:14px;display:flex;align-items:center;justify-content:center;padding:5px;}
-  .pill{display:inline-block;border:1.5px solid #E8E219;border-radius:20px;padding:3px 14px;font-size:10px;color:#E8E219;letter-spacing:1px;margin-bottom:8px;}
-  .t-cafe{font-size:48px;color:#E8E219;letter-spacing:-2px;line-height:1;}
-  .t-com{font-size:13px;color:#fff;font-weight:400;letter-spacing:3px;margin:2px 0;}
-  .t-pastores{font-size:42px;color:#E8E219;font-style:italic;letter-spacing:-2px;line-height:1;}
-  .t-sub{color:#aaa;font-size:12px;font-weight:400;margin-top:5px;}
-  .steps-bar{display:flex;background:#111;border-top:1px solid #222;}
-  .step-tab{flex:1;padding:13px 8px;text-align:center;font-size:11px;font-weight:900;letter-spacing:1px;color:#555;border-bottom:3px solid transparent;transition:all .2s;}
-  .step-tab.active{color:#E8E219;border-bottom-color:#E8E219;}
-  .step-tab.done{color:#00C0F3;border-bottom-color:#00C0F3;}
-  .section{display:none;padding:24px 32px 32px;}
-  .section.visible{display:block;}
-  .sec-label{font-size:10px;letter-spacing:2px;color:#00C0F3;font-weight:900;margin-bottom:8px;margin-top:20px;}
-  .sec-label:first-child{margin-top:0;}
-  .field{width:100%;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.15);border-radius:10px;padding:13px 16px;color:#fff;font-size:14px;font-family:Arial,sans-serif;outline:none;transition:border-color .18s;-webkit-appearance:none;appearance:none;}
-  .field:focus{border-color:#00C0F3;}
-  .field::placeholder{color:rgba(255,255,255,0.4);}
-  .field.error{border-color:#E83A3A;}
-  .mt{margin-top:10px;}
-  .err-msg{color:#E83A3A;font-size:11px;font-weight:400;font-family:Arial,sans-serif;margin-top:5px;display:none;}
-  .err-msg.show{display:block;}
-  .radio-group{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-  .radio-opt{border:1.5px solid rgba(255,255,255,0.15);border-radius:10px;padding:14px 16px;cursor:pointer;transition:all .18s;background:rgba(255,255,255,0.04);display:flex;align-items:center;gap:12px;user-select:none;}
-  .radio-opt:hover{border-color:#00C0F3;background:rgba(0,192,243,0.07);}
-  .radio-opt.selected{border-color:#E8E219;background:rgba(232,226,25,0.09);}
-  .r-circle{width:20px;height:20px;border-radius:50%;border:2px solid rgba(255,255,255,0.3);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .18s;}
-  .radio-opt.selected .r-circle{border-color:#E8E219;background:#E8E219;}
-  .r-dot{width:8px;height:8px;border-radius:50%;background:#0a0a0a;display:none;}
-  .radio-opt.selected .r-dot{display:block;}
-  .r-label{font-size:14px;font-weight:900;color:#fff;}
-  .r-sub{font-size:11px;color:#aaa;font-weight:400;font-family:Arial,sans-serif;margin-top:2px;}
-  .divider{height:0.5px;background:rgba(255,255,255,0.1);margin:22px 0;}
-  .bottom-bar{background:#E8E219;padding:14px 32px;display:flex;align-items:center;justify-content:space-between;margin:0 -32px -32px;}
-  .bottom-label{font-size:10px;color:#0a0a0a;font-weight:900;letter-spacing:2px;}
-  .btn{background:#0a0a0a;color:#E8E219;border:none;border-radius:8px;padding:11px 26px;font-size:13px;font-weight:900;font-family:'Arial Black',Arial;cursor:pointer;letter-spacing:1px;transition:all .18s;}
-  .btn:hover{background:#1a1a1a;transform:scale(1.03);}
-  .btn:active{transform:scale(0.97);}
-  .btn-ghost{background:rgba(0,0,0,0.18);color:#0a0a0a;border:none;border-radius:8px;padding:11px 20px;font-size:12px;font-weight:900;font-family:'Arial Black',Arial;cursor:pointer;transition:all .18s;}
-  .btn-ghost:hover{background:rgba(0,0,0,0.28);}
-  .counter-bar{background:#111;border:1.5px solid rgba(255,255,255,0.1);border-radius:10px;padding:11px 16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
-  .counter-bar span{font-size:13px;font-weight:400;font-family:Arial,sans-serif;color:#aaa;}
-  .counter-val{font-size:16px;font-weight:900;color:#E8E219;}
-  .themes-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-  .theme-opt{border:1.5px solid rgba(255,255,255,0.12);border-radius:10px;padding:12px 14px;cursor:pointer;transition:all .18s;background:rgba(255,255,255,0.03);display:flex;align-items:center;gap:10px;user-select:none;}
-  .theme-opt:hover{border-color:#00C0F3;background:rgba(0,192,243,0.07);}
-  .theme-opt.selected{border-color:#E8E219;background:rgba(232,226,25,0.09);}
-  .theme-opt.disabled{opacity:.35;cursor:not-allowed;border-color:rgba(255,255,255,0.08);}
-  .theme-opt.disabled:hover{border-color:rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);}
-  .chk-box{width:18px;height:18px;border-radius:5px;border:2px solid rgba(255,255,255,0.25);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .18s;}
-  .theme-opt.selected .chk-box{border-color:#E8E219;background:#E8E219;}
-  .chk-mark{display:none;font-size:12px;color:#0a0a0a;font-weight:900;}
-  .theme-opt.selected .chk-mark{display:block;}
-  .theme-name{font-size:13px;font-weight:900;color:#fff;line-height:1.3;}
-  .theme-cat{font-size:10px;color:#777;font-weight:400;margin-top:2px;}
-  .themes-error{color:#E83A3A;font-size:12px;font-family:Arial,sans-serif;margin-top:8px;display:none;}
-  .themes-error.show{display:block;}
-  .sediar-box{background:rgba(0,192,243,0.06);border:1.5px solid rgba(0,192,243,0.25);border-radius:14px;padding:18px 18px 14px;}
-  .sediar-box .sec-label{color:#E8E219;margin-top:0;margin-bottom:12px;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Arial Black',Arial,sans-serif;background:#0a0a0a;color:#fff;min-height:100vh;}
 
-  /* CHART SECTION */
-  .chart-box{background:#111;border:1.5px solid rgba(255,255,255,0.08);border-radius:14px;padding:20px;margin-top:18px;}
-  .chart-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
-  .chart-title{font-size:10px;letter-spacing:2px;color:#00C0F3;font-weight:900;}
-  .chart-refresh{background:rgba(0,192,243,0.12);border:1px solid rgba(0,192,243,0.3);border-radius:6px;padding:5px 12px;color:#00C0F3;font-size:11px;font-weight:900;font-family:'Arial Black',Arial;cursor:pointer;transition:all .18s;}
-  .chart-refresh:hover{background:rgba(0,192,243,0.22);}
-  .chart-loading{text-align:center;padding:24px;color:#555;font-size:12px;font-weight:400;font-family:Arial,sans-serif;}
-  .chart-wrap{position:relative;width:100%;}
+/* ── WRAPPER CENTRALIZADO ── */
+.page-wrap{max-width:600px;margin:0 auto;}
 
-  /* LOADING */
-  .loading-screen{display:none;flex-direction:column;align-items:center;justify-content:center;padding:80px 32px;text-align:center;}
-  .loading-screen.visible{display:flex;}
-  .spinner{width:44px;height:44px;border:3px solid rgba(255,255,255,0.1);border-top-color:#00C0F3;border-radius:50%;animation:spin .8s linear infinite;margin-bottom:16px;}
-  @keyframes spin{to{transform:rotate(360deg);}}
-  .l-txt{color:#aaa;font-size:14px;font-weight:400;font-family:Arial,sans-serif;}
-  .success-screen{display:none;flex-direction:column;align-items:center;justify-content:center;padding:60px 32px;text-align:center;}
-  .success-screen.visible{display:flex;}
-  .s-icon{width:72px;height:72px;border-radius:50%;background:#E8E219;display:flex;align-items:center;justify-content:center;margin-bottom:18px;}
-  .s-check{font-size:36px;color:#0a0a0a;font-weight:900;line-height:1;}
-  .s-name{background:rgba(0,192,243,0.15);border:1.5px solid #00C0F3;border-radius:10px;padding:12px 24px;margin:14px 0;font-size:15px;font-weight:900;color:#00C0F3;font-family:Arial,sans-serif;}
-  .s-themes-wrap{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:10px 0;}
-  .s-tag{background:rgba(232,226,25,0.12);border:1px solid #E8E219;border-radius:6px;padding:5px 12px;font-size:12px;color:#E8E219;font-family:Arial,sans-serif;}
-  .s-sub{color:#555;font-size:13px;font-weight:400;font-family:Arial,sans-serif;margin-top:12px;line-height:1.8;}
+/* ── HEADER ── */
+.header{background:#0a0a0a;position:relative;overflow:hidden;padding:0;}
+.header::after{content:'';position:absolute;top:0;right:0;width:0;height:0;border-style:solid;border-width:0 160px 120px 0;border-color:transparent #00C0F3 transparent transparent;}
+.header::before{content:'';position:absolute;top:0;right:0;width:0;height:0;border-style:solid;border-width:0 55px 44px 0;border-color:transparent #E8E219 transparent transparent;z-index:2;}
+/* Faixa de marca: Rede Inspire de Igrejas centralizado */
+.header-brand{position:relative;z-index:1;text-align:center;padding:18px 24px 14px;border-bottom:0.5px solid rgba(255,255,255,0.08);}
+.brand-logo{display:inline-block;width:58px;height:58px;margin-bottom:10px;}
+.brand-name{font-size:22px;color:#fff;font-weight:900;letter-spacing:0.5px;line-height:1.1;}
+.brand-name span{color:#E8E219;}
+/* Bloco Café com Pastores */
+.header-inner{display:flex;align-items:center;gap:14px;position:relative;z-index:1;padding:18px 24px 16px;}
+.logo-wrap{flex-shrink:0;width:56px;height:56px;background:#fff;border-radius:10px;display:flex;align-items:center;justify-content:center;padding:4px;}
+.t-cafe{font-size:38px;color:#E8E219;letter-spacing:-2px;line-height:1;}
+.t-com{font-size:11px;color:#fff;font-weight:400;letter-spacing:3px;margin:2px 0;}
+.t-pastores{font-size:32px;color:#E8E219;font-style:italic;letter-spacing:-2px;line-height:1;}
+.t-sub{color:#aaa;font-size:11px;font-weight:400;margin-top:3px;}
+
+/* ── STEPS BAR ── */
+.steps-bar{display:flex;background:#111;border-top:1px solid #222;}
+.step-tab{flex:1;padding:12px 8px;text-align:center;font-size:11px;font-weight:900;letter-spacing:1px;color:#555;border-bottom:3px solid transparent;transition:all .2s;}
+.step-tab.active{color:#E8E219;border-bottom-color:#E8E219;}
+.step-tab.done{color:#00C0F3;border-bottom-color:#00C0F3;}
+
+/* ── SECTIONS ── */
+.section{display:none;padding:22px 24px 28px;}
+.section.visible{display:block;}
+
+/* ── LABELS ── */
+.sec-label{font-size:10px;letter-spacing:2px;color:#00C0F3;font-weight:900;margin-bottom:7px;margin-top:18px;}
+.sec-label:first-child{margin-top:0;}
+
+/* ── FIELDS ── */
+.field{width:100%;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.15);border-radius:10px;padding:12px 14px;color:#fff;font-size:14px;font-family:Arial,sans-serif;outline:none;transition:border-color .18s;-webkit-appearance:none;appearance:none;}
+.field:focus{border-color:#00C0F3;}
+.field::placeholder{color:rgba(255,255,255,0.4);}
+.field.error{border-color:#E83A3A;}
+.err-msg{color:#E83A3A;font-size:11px;font-weight:400;font-family:Arial,sans-serif;margin-top:4px;display:none;}
+.err-msg.show{display:block;}
+
+/* ── RADIO ── */
+.radio-group{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.radio-opt{border:1.5px solid rgba(255,255,255,0.15);border-radius:10px;padding:13px 14px;cursor:pointer;transition:all .18s;background:rgba(255,255,255,0.04);display:flex;align-items:center;gap:10px;user-select:none;}
+.radio-opt:hover{border-color:#00C0F3;background:rgba(0,192,243,0.07);}
+.radio-opt.selected{border-color:#E8E219;background:rgba(232,226,25,0.09);}
+.r-circle{width:18px;height:18px;border-radius:50%;border:2px solid rgba(255,255,255,0.3);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .18s;}
+.radio-opt.selected .r-circle{border-color:#E8E219;background:#E8E219;}
+.r-dot{width:7px;height:7px;border-radius:50%;background:#0a0a0a;display:none;}
+.radio-opt.selected .r-dot{display:block;}
+.r-label{font-size:13px;font-weight:900;color:#fff;}
+.r-sub{font-size:10px;color:#aaa;font-weight:400;font-family:Arial,sans-serif;margin-top:2px;}
+
+/* ── DIVIDER ── */
+.divider{height:0.5px;background:rgba(255,255,255,0.1);margin:20px 0;}
+
+/* ── BOTTOM BAR ── */
+.bottom-bar{background:#E8E219;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;margin:0 -24px -28px;}
+.bottom-label{font-size:10px;color:#0a0a0a;font-weight:900;letter-spacing:2px;}
+.btn{background:#0a0a0a;color:#E8E219;border:none;border-radius:8px;padding:10px 22px;font-size:12px;font-weight:900;font-family:'Arial Black',Arial;cursor:pointer;letter-spacing:1px;transition:all .18s;}
+.btn:hover{background:#1a1a1a;transform:scale(1.03);}
+.btn:active{transform:scale(0.97);}
+.btn-ghost{background:rgba(0,0,0,0.15);color:#0a0a0a;border:none;border-radius:8px;padding:10px 16px;font-size:11px;font-weight:900;font-family:'Arial Black',Arial;cursor:pointer;transition:all .18s;}
+.btn-ghost:hover{background:rgba(0,0,0,0.25);}
+
+/* ── BTN VER GRÁFICO (tela inicial) ── */
+.btn-chart-home{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:rgba(0,192,243,0.08);border:1.5px solid rgba(0,192,243,0.3);border-radius:10px;padding:12px;color:#00C0F3;font-size:12px;font-weight:900;font-family:'Arial Black',Arial;cursor:pointer;transition:all .18s;margin-top:16px;}
+.btn-chart-home:hover{background:rgba(0,192,243,0.16);}
+
+/* ── COUNTER ── */
+.counter-bar{background:#111;border:1.5px solid rgba(255,255,255,0.1);border-radius:10px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.counter-bar span{font-size:12px;font-weight:400;font-family:Arial,sans-serif;color:#aaa;}
+.counter-val{font-size:15px;font-weight:900;color:#E8E219;}
+
+/* ── THEMES ── */
+.themes-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.theme-opt{border:1.5px solid rgba(255,255,255,0.12);border-radius:10px;padding:11px 12px;cursor:pointer;transition:all .18s;background:rgba(255,255,255,0.03);display:flex;align-items:center;gap:9px;user-select:none;}
+.theme-opt:hover{border-color:#00C0F3;background:rgba(0,192,243,0.07);}
+.theme-opt.selected{border-color:#E8E219;background:rgba(232,226,25,0.09);}
+.theme-opt.disabled{opacity:.35;cursor:not-allowed;border-color:rgba(255,255,255,0.08);}
+.theme-opt.disabled:hover{border-color:rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);}
+.chk-box{width:17px;height:17px;border-radius:4px;border:2px solid rgba(255,255,255,0.25);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .18s;}
+.theme-opt.selected .chk-box{border-color:#E8E219;background:#E8E219;}
+.chk-mark{display:none;font-size:11px;color:#0a0a0a;font-weight:900;}
+.theme-opt.selected .chk-mark{display:block;}
+.theme-name{font-size:12px;font-weight:900;color:#fff;line-height:1.3;}
+.theme-cat{font-size:10px;color:#777;font-weight:400;margin-top:1px;}
+.themes-error{color:#E83A3A;font-size:11px;font-family:Arial,sans-serif;margin-top:7px;display:none;}
+.themes-error.show{display:block;}
+
+/* ── SEDIAR ── */
+.sediar-box{background:rgba(0,192,243,0.06);border:1.5px solid rgba(0,192,243,0.25);border-radius:12px;padding:16px 16px 12px;}
+.sediar-box .sec-label{color:#E8E219;margin-top:0;margin-bottom:10px;}
+
+/* ── CHART BOX ── */
+.chart-box{background:#111;border:1.5px solid rgba(255,255,255,0.08);border-radius:12px;padding:18px;margin-top:16px;}
+.chart-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.chart-title{font-size:10px;letter-spacing:2px;color:#00C0F3;font-weight:900;}
+.chart-refresh{background:rgba(0,192,243,0.12);border:1px solid rgba(0,192,243,0.3);border-radius:6px;padding:5px 10px;color:#00C0F3;font-size:10px;font-weight:900;font-family:'Arial Black',Arial;cursor:pointer;transition:all .18s;}
+.chart-refresh:hover{background:rgba(0,192,243,0.22);}
+.chart-loading{text-align:center;padding:20px;color:#555;font-size:12px;font-weight:400;font-family:Arial,sans-serif;}
+.chart-wrap{position:relative;width:100%;}
+
+/* ── LOADING ── */
+.loading-screen{display:none;flex-direction:column;align-items:center;justify-content:center;padding:80px 24px;text-align:center;}
+.loading-screen.visible{display:flex;}
+.spinner{width:40px;height:40px;border:3px solid rgba(255,255,255,0.1);border-top-color:#00C0F3;border-radius:50%;animation:spin .8s linear infinite;margin-bottom:14px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.l-txt{color:#aaa;font-size:13px;font-weight:400;font-family:Arial,sans-serif;}
+
+/* ── SUCCESS ── */
+.success-screen{display:none;flex-direction:column;align-items:center;padding:40px 24px 32px;text-align:center;}
+.success-screen.visible{display:flex;}
+.s-icon{width:64px;height:64px;border-radius:50%;background:#E8E219;display:flex;align-items:center;justify-content:center;margin-bottom:14px;}
+.s-check{font-size:32px;color:#0a0a0a;font-weight:900;line-height:1;}
+.s-name{background:rgba(0,192,243,0.15);border:1.5px solid #00C0F3;border-radius:10px;padding:10px 20px;margin:12px 0;font-size:13px;font-weight:900;color:#00C0F3;font-family:Arial,sans-serif;}
+.s-themes-wrap{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:8px 0;}
+.s-tag{background:rgba(232,226,25,0.12);border:1px solid #E8E219;border-radius:6px;padding:4px 10px;font-size:11px;color:#E8E219;font-family:Arial,sans-serif;}
+.s-sub{color:#555;font-size:12px;font-weight:400;font-family:Arial,sans-serif;margin-top:10px;line-height:1.8;}
+
+/* ── CHART SCREEN (página de gráfico standalone) ── */
+.chart-screen{display:none;padding:22px 24px 32px;}
+.chart-screen.visible{display:block;}
+.chart-screen-header{display:flex;align-items:center;gap:10px;margin-bottom:18px;}
+.btn-back{background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.15);border-radius:8px;padding:8px 14px;color:#fff;font-size:11px;font-weight:900;font-family:'Arial Black',Arial;cursor:pointer;transition:all .18s;}
+.btn-back:hover{background:rgba(255,255,255,0.1);}
 </style>
 </head>
 <body>
 
+<div class="page-wrap">
+
+<!-- HEADER -->
 <div class="header">
+
+  <!-- Faixa superior: Rede Inspire de Igrejas centralizado -->
+  <div class="header-brand">
+    <!-- Logo fiel: blob orgânico + 4 pétalas curvas entreladas + losango central -->
+    <svg class="brand-logo" viewBox="0 0 200 210" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Blob orgânico de fundo — assimétrico, maior base esquerda-baixo -->
+      <path d="
+        M105 12
+        C125 4, 152 10, 166 28
+        C180 24, 194 40, 194 58
+        C202 70, 198 90, 186 100
+        C194 116, 188 138, 172 148
+        C168 168, 150 182, 130 184
+        C116 194, 96 196, 80 188
+        C62 196, 42 188, 30 174
+        C14 172, 2 156, 4 138
+        C-4 124, 2 102, 14 90
+        C6 74, 12 52, 28 40
+        C32 22, 52 10, 72 10
+        C82 4, 96 8, 105 12Z
+      " fill="white"/>
+
+      <!-- Pétala CIMA: oval inclinada levemente -->
+      <path d="M100 22 C82 22 68 38 68 58 C68 78 82 92 100 92 C118 92 132 78 132 58 C132 38 118 22 100 22Z"
+        fill="white" stroke="#0d0d0d" stroke-width="11" stroke-linejoin="round"/>
+
+      <!-- Pétala DIREITA -->
+      <path d="M108 100 C108 82 124 68 144 68 C164 68 178 82 178 100 C178 118 164 132 144 132 C124 132 108 118 108 100Z"
+        fill="white" stroke="#0d0d0d" stroke-width="11" stroke-linejoin="round"/>
+
+      <!-- Pétala BAIXO: mais longa, inclinada para baixo-esquerda (assimetria do logo) -->
+      <path d="M92 108 C110 108 124 124 120 146 C116 166 98 178 80 172 C62 166 52 148 58 128 C64 110 76 108 92 108Z"
+        fill="white" stroke="#0d0d0d" stroke-width="11" stroke-linejoin="round"/>
+
+      <!-- Pétala ESQUERDA -->
+      <path d="M92 100 C92 118 76 132 56 132 C36 132 22 118 22 100 C22 82 36 68 56 68 C76 68 92 82 92 100Z"
+        fill="white" stroke="#0d0d0d" stroke-width="11" stroke-linejoin="round"/>
+
+      <!-- Losango central -->
+      <rect x="88" y="88" width="24" height="24" rx="2" transform="rotate(45 100 100)"
+        fill="white" stroke="#0d0d0d" stroke-width="9"/>
+    </svg>
+
+    <div class="brand-name">REDE INSPIRE <span>DE IGREJAS</span></div>
+  </div>
+
+  <!-- Bloco Café com Pastores -->
   <div class="header-inner">
     <div class="logo-wrap">
-      <svg width="62" height="62" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <!-- Blob orgânico fiel ao original: assimétrico, inclinado levemente, maior na base esquerda -->
-        <path d="
-          M58 6
-          C70 2 84 6 92 16
-          C102 14 112 24 113 36
-          C120 44 118 58 110 66
-          C116 76 112 90 102 96
-          C98 108 86 116 74 115
-          C64 120 50 118 42 110
-          C30 112 18 102 16 90
-          C6 84 2 70 8 58
-          C2 48 6 32 16 24
-          C18 12 32 4 44 5
-          C48 2 54 4 58 6Z
-        " fill="white"/>
-        <!-- Pétala CIMA: elipse vertical -->
-        <ellipse cx="60" cy="36" rx="13" ry="19" fill="white" stroke="#0d0d0d" stroke-width="7"/>
-        <!-- Pétala DIREITA: elipse horizontal -->
-        <ellipse cx="84" cy="60" rx="19" ry="13" fill="white" stroke="#0d0d0d" stroke-width="7"/>
-        <!-- Pétala BAIXO: elipse vertical -->
-        <ellipse cx="60" cy="84" rx="13" ry="19" fill="white" stroke="#0d0d0d" stroke-width="7"/>
-        <!-- Pétala ESQUERDA: elipse horizontal -->
-        <ellipse cx="36" cy="60" rx="19" ry="13" fill="white" stroke="#0d0d0d" stroke-width="7"/>
-        <!-- Losango central -->
-        <rect x="52" y="52" width="16" height="16" rx="1.5" transform="rotate(45 60 60)" fill="white" stroke="#0d0d0d" stroke-width="6"/>
+      <svg width="48" height="48" viewBox="0 0 200 210" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M105 12 C125 4, 152 10, 166 28 C180 24, 194 40, 194 58 C202 70, 198 90, 186 100 C194 116, 188 138, 172 148 C168 168, 150 182, 130 184 C116 194, 96 196, 80 188 C62 196, 42 188, 30 174 C14 172, 2 156, 4 138 C-4 124, 2 102, 14 90 C6 74, 12 52, 28 40 C32 22, 52 10, 72 10 C82 4, 96 8, 105 12Z" fill="#0a0a0a"/>
+        <path d="M100 22 C82 22 68 38 68 58 C68 78 82 92 100 92 C118 92 132 78 132 58 C132 38 118 22 100 22Z" fill="#0a0a0a" stroke="white" stroke-width="11" stroke-linejoin="round"/>
+        <path d="M108 100 C108 82 124 68 144 68 C164 68 178 82 178 100 C178 118 164 132 144 132 C124 132 108 118 108 100Z" fill="#0a0a0a" stroke="white" stroke-width="11" stroke-linejoin="round"/>
+        <path d="M92 108 C110 108 124 124 120 146 C116 166 98 178 80 172 C62 166 52 148 58 128 C64 110 76 108 92 108Z" fill="#0a0a0a" stroke="white" stroke-width="11" stroke-linejoin="round"/>
+        <path d="M92 100 C92 118 76 132 56 132 C36 132 22 118 22 100 C22 82 36 68 56 68 C76 68 92 82 92 100Z" fill="#0a0a0a" stroke="white" stroke-width="11" stroke-linejoin="round"/>
+        <rect x="88" y="88" width="24" height="24" rx="2" transform="rotate(45 100 100)" fill="#0a0a0a" stroke="white" stroke-width="9"/>
       </svg>
     </div>
     <div>
-      <div class="pill">REDE INSPIRE</div>
       <div class="t-cafe">CAFÉ</div>
       <div class="t-com">com</div>
       <div class="t-pastores">pastores</div>
@@ -139,13 +211,15 @@
   </div>
 </div>
 
+<!-- STEPS BAR -->
 <div class="steps-bar">
   <div class="step-tab active" id="tab1">👤 INSCRIÇÃO</div>
   <div class="step-tab" id="tab2">✓ VOTAÇÃO</div>
 </div>
 
-<!-- STEP 1 -->
+<!-- ===== STEP 1: INSCRIÇÃO ===== -->
 <div id="step1" class="section visible">
+
   <div class="sec-label">NOME</div>
   <input class="field" id="nome" type="text" placeholder="Digite seu nome completo" autocomplete="off">
   <div class="err-msg" id="err-nome">Por favor, informe seu nome completo.</div>
@@ -175,6 +249,11 @@
   </div>
   <div class="err-msg" id="err-filiada">Por favor, selecione uma opção.</div>
 
+  <!-- Botão ver gráfico -->
+  <button class="btn-chart-home" onclick="showChartScreen()">
+    📊 VER RESULTADO DA VOTAÇÃO
+  </button>
+
   <div class="divider"></div>
   <div class="bottom-bar">
     <span class="bottom-label">REDE INSPIRE • RJ</span>
@@ -182,8 +261,9 @@
   </div>
 </div>
 
-<!-- STEP 2 -->
+<!-- ===== STEP 2: VOTAÇÃO ===== -->
 <div id="step2" class="section">
+
   <div class="sec-label">ESCOLHA OS TEMAS</div>
   <div class="counter-bar">
     <span>Selecione até <strong style="color:#fff;">5 temas</strong> para o próximo encontro</span>
@@ -268,18 +348,6 @@
     <div class="err-msg" id="err-sediar">Por favor, selecione uma opção.</div>
   </div>
 
-  <!-- GRÁFICO -->
-  <div class="chart-box">
-    <div class="chart-header">
-      <span class="chart-title">RESULTADO DA VOTAÇÃO EM TEMPO REAL</span>
-      <button class="chart-refresh" onclick="loadChart()">↻ ATUALIZAR</button>
-    </div>
-    <div id="chart-loading" class="chart-loading">Carregando dados da votação...</div>
-    <div class="chart-wrap" id="chart-wrap" style="display:none;">
-      <canvas id="votacaoChart"></canvas>
-    </div>
-  </div>
-
   <div class="divider"></div>
   <div class="bottom-bar">
     <button class="btn-ghost" onclick="backStep1()">← VOLTAR</button>
@@ -288,221 +356,259 @@
   </div>
 </div>
 
-<!-- LOADING -->
+<!-- ===== LOADING ===== -->
 <div class="loading-screen" id="loading">
   <div class="spinner"></div>
   <div class="l-txt">Enviando sua inscrição...</div>
 </div>
 
-<!-- SUCCESS -->
+<!-- ===== SUCCESS ===== -->
 <div class="success-screen" id="success">
   <div class="s-icon"><div class="s-check">✓</div></div>
-  <div class="t-cafe" style="font-size:28px;">Inscrição confirmada!</div>
+  <div class="t-cafe" style="font-size:26px;">Inscrição confirmada!</div>
   <div class="s-name" id="s-nome-display"></div>
-  <div class="t-sub" style="color:#aaa;font-size:13px;margin-bottom:10px;">Temas votados:</div>
+  <div class="t-sub" style="color:#aaa;font-size:12px;margin-bottom:8px;">Temas votados:</div>
   <div class="s-themes-wrap" id="s-themes-display"></div>
   <div class="s-sub">Obrigado pela sua participação, pastor(a).<br>Nos vemos no próximo Café com Pastores!</div>
+
+  <!-- GRÁFICO NA TELA DE SUCESSO -->
+  <div class="chart-box" style="width:100%;margin-top:24px;text-align:left;">
+    <div class="chart-header">
+      <span class="chart-title">RESULTADO DA VOTAÇÃO</span>
+      <button class="chart-refresh" onclick="loadChart('s-chart','s-chart-loading')">↻ ATUALIZAR</button>
+    </div>
+    <div id="s-chart-loading" class="chart-loading">Carregando resultados...</div>
+    <div class="chart-wrap" id="s-chart-wrap" style="display:none;">
+      <canvas id="s-chart"></canvas>
+    </div>
+  </div>
 </div>
 
-<script>
-  const ENDPOINT = 'https://script.google.com/macros/s/AKfycbyaNJ4nJSRlLUhKqu0dU3p9GiAyExbp9aFmXGnw23JNxpwFQ9x4A4wiE26NdZG4dZ_r5w/exec';
-  let selectedThemes = [], filiada = '', sediar = '', chartInstance = null;
+<!-- ===== TELA DO GRÁFICO (acesso da tela inicial) ===== -->
+<div class="chart-screen" id="chart-screen">
+  <div class="chart-screen-header">
+    <button class="btn-back" onclick="hideChartScreen()">← VOLTAR</button>
+    <span class="sec-label" style="margin:0;">RESULTADO DA VOTAÇÃO EM TEMPO REAL</span>
+  </div>
+  <div class="chart-box" style="margin-top:0;">
+    <div class="chart-header">
+      <span class="chart-title">TEMAS MAIS VOTADOS</span>
+      <button class="chart-refresh" onclick="loadChart('home-chart','home-chart-loading')">↻ ATUALIZAR</button>
+    </div>
+    <div id="home-chart-loading" class="chart-loading">Carregando resultados...</div>
+    <div class="chart-wrap" id="home-chart-wrap" style="display:none;">
+      <canvas id="home-chart"></canvas>
+    </div>
+  </div>
+</div>
 
-  // WhatsApp mask
-  document.getElementById('whatsapp').addEventListener('input', function(e) {
-    let v = e.target.value.replace(/\D/g,'');
-    if (v.length > 11) v = v.slice(0,11);
-    if (!v.length) { e.target.value = ''; return; }
-    if (v.length <= 2)       e.target.value = '(' + v;
-    else if (v.length <= 6)  e.target.value = '(' + v.slice(0,2) + ') ' + v.slice(2);
-    else if (v.length <= 10) e.target.value = '(' + v.slice(0,2) + ') ' + v.slice(2,6) + '-' + v.slice(6);
-    else                     e.target.value = '(' + v.slice(0,2) + ') ' + v.slice(2,7) + '-' + v.slice(7);
+</div><!-- /page-wrap -->
+
+<script>
+const ENDPOINT = 'https://script.google.com/macros/s/AKfycbyaNJ4nJSRlLUhKqu0dU3p9GiAyExbp9aFmXGnw23JNxpwFQ9x4A4wiE26NdZG4dZ_r5w/exec';
+let selectedThemes=[], filiada='', sediar='';
+const chartInstances={};
+
+/* ── WhatsApp mask ── */
+document.getElementById('whatsapp').addEventListener('input',function(e){
+  let v=e.target.value.replace(/\D/g,'');
+  if(v.length>11)v=v.slice(0,11);
+  if(!v.length){e.target.value='';return;}
+  if(v.length<=2)       e.target.value='('+v;
+  else if(v.length<=6)  e.target.value='('+v.slice(0,2)+') '+v.slice(2);
+  else if(v.length<=10) e.target.value='('+v.slice(0,2)+') '+v.slice(2,6)+'-'+v.slice(6);
+  else                  e.target.value='('+v.slice(0,2)+') '+v.slice(2,7)+'-'+v.slice(7);
+});
+
+/* ── Helpers ── */
+function showErr(id,s){document.getElementById(id).classList.toggle('show',s);}
+function setErr(id,s){document.getElementById(id).classList.toggle('error',s);}
+function hide(id){document.getElementById(id).style.display='none';}
+function show(id,d){document.getElementById(id).style.display=d||'block';}
+
+/* ── Filiada / Sediar ── */
+function selectFiliada(v){
+  filiada=v;
+  document.getElementById('r-sim').classList.toggle('selected',v==='sim');
+  document.getElementById('r-nao').classList.toggle('selected',v==='nao');
+  showErr('err-filiada',false);
+}
+function selectSediar(v){
+  sediar=v;
+  document.getElementById('s-sim').classList.toggle('selected',v==='sim');
+  document.getElementById('s-nao').classList.toggle('selected',v==='nao');
+  showErr('err-sediar',false);
+}
+
+/* ── Navegação ── */
+function allOff(){
+  ['step1','step2','loading','success','chart-screen'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){el.classList.remove('visible');el.style.display='';}
+  });
+  document.querySelector('.steps-bar').style.display='flex';
+}
+
+function goStep2(){
+  let ok=true;
+  const nome=document.getElementById('nome').value.trim();
+  const wp=document.getElementById('whatsapp').value.replace(/\D/g,'');
+  const ig=document.getElementById('igreja').value.trim();
+  const fn=document.getElementById('funcao').value.trim();
+  if(!nome){setErr('nome',true);showErr('err-nome',true);ok=false;}else{setErr('nome',false);showErr('err-nome',false);}
+  if(wp.length<10){setErr('whatsapp',true);showErr('err-whatsapp',true);ok=false;}else{setErr('whatsapp',false);showErr('err-whatsapp',false);}
+  if(!ig){setErr('igreja',true);showErr('err-igreja',true);ok=false;}else{setErr('igreja',false);showErr('err-igreja',false);}
+  if(!fn){setErr('funcao',true);showErr('err-funcao',true);ok=false;}else{setErr('funcao',false);showErr('err-funcao',false);}
+  if(!filiada){showErr('err-filiada',true);ok=false;}else{showErr('err-filiada',false);}
+  if(!ok)return;
+  document.getElementById('step1').classList.remove('visible');
+  document.getElementById('step2').classList.add('visible');
+  document.getElementById('tab1').classList.remove('active');
+  document.getElementById('tab1').classList.add('done');
+  document.getElementById('tab2').classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function backStep1(){
+  document.getElementById('step2').classList.remove('visible');
+  document.getElementById('step1').classList.add('visible');
+  document.getElementById('tab2').classList.remove('active');
+  document.getElementById('tab1').classList.remove('done');
+  document.getElementById('tab1').classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function showChartScreen(){
+  allOff();
+  document.querySelector('.steps-bar').style.display='none';
+  document.getElementById('chart-screen').classList.add('visible');
+  window.scrollTo(0,0);
+  loadChart('home-chart','home-chart-loading');
+}
+function hideChartScreen(){
+  allOff();
+  document.querySelector('.steps-bar').style.display='flex';
+  document.getElementById('step1').classList.add('visible');
+  window.scrollTo(0,0);
+}
+
+/* ── Temas ── */
+function toggleTheme(el){
+  if(el.classList.contains('disabled')&&!el.classList.contains('selected'))return;
+  if(el.classList.contains('selected')){
+    el.classList.remove('selected');
+    selectedThemes=selectedThemes.filter(t=>t!==el.dataset.theme);
+  }else{
+    if(selectedThemes.length>=5)return;
+    el.classList.add('selected');
+    selectedThemes.push(el.dataset.theme);
+  }
+  document.getElementById('count').textContent=selectedThemes.length;
+  document.querySelectorAll('.theme-opt').forEach(o=>{
+    if(!o.classList.contains('selected'))o.classList.toggle('disabled',selectedThemes.length>=5);
+  });
+  if(selectedThemes.length>0)document.getElementById('err-themes').classList.remove('show');
+}
+
+/* ── Gráfico ── */
+async function loadChart(canvasId, loadingId){
+  const wrapId = canvasId+'-wrap';
+  document.getElementById(loadingId).style.display='block';
+  document.getElementById(wrapId).style.display='none';
+  try{
+    const res=await fetch(ENDPOINT+'?action=votos');
+    const data=await res.json();
+    renderChart(canvasId, loadingId, wrapId, data);
+  }catch(e){
+    document.getElementById(loadingId).textContent='Não foi possível carregar. Tente atualizar.';
+  }
+}
+
+function renderChart(canvasId, loadingId, wrapId, data){
+  document.getElementById(loadingId).style.display='none';
+  document.getElementById(wrapId).style.display='block';
+
+  const sorted=Object.entries(data).sort((a,b)=>b[1]-a[1]).slice(0,15);
+  const labels=sorted.map(x=>x[0]);
+  const values=sorted.map(x=>x[1]);
+  const palette=['#E8E219','#00C0F3','#ffffff','#E8E219','#00C0F3','#aaaaaa'];
+  const colors=labels.map((_,i)=>palette[i%palette.length]);
+
+  const ctx=document.getElementById(canvasId).getContext('2d');
+  if(chartInstances[canvasId])chartInstances[canvasId].destroy();
+
+  const h=Math.max(labels.length*38+20, 80);
+  document.getElementById(canvasId).style.height=h+'px';
+  document.getElementById(wrapId).style.height=h+'px';
+
+  chartInstances[canvasId]=new Chart(ctx,{
+    type:'bar',
+    data:{labels,datasets:[{data:values,backgroundColor:colors,borderWidth:0,borderRadius:6,borderSkipped:false}]},
+    options:{
+      indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          backgroundColor:'#1a1a1a',titleColor:'#E8E219',bodyColor:'#fff',
+          borderColor:'rgba(255,255,255,0.1)',borderWidth:1,
+          callbacks:{label:ctx=>' '+ctx.raw+' voto'+(ctx.raw===1?'':'s')}
+        }
+      },
+      scales:{
+        x:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#aaa',font:{size:11},stepSize:1},border:{color:'rgba(255,255,255,0.1)'}},
+        y:{grid:{display:false},ticks:{color:'#fff',font:{size:11,weight:'bold'}},border:{color:'rgba(255,255,255,0.1)'}}
+      }
+    }
+  });
+  chartInstances[canvasId].resize();
+}
+
+/* ── Enviar ── */
+async function enviar(){
+  let ok=true;
+  if(selectedThemes.length===0){document.getElementById('err-themes').classList.add('show');ok=false;}
+  else{document.getElementById('err-themes').classList.remove('show');}
+  if(!sediar){showErr('err-sediar',true);ok=false;}else{showErr('err-sediar',false);}
+  if(!ok)return;
+
+  const payload={
+    nome:document.getElementById('nome').value.trim(),
+    whatsapp:document.getElementById('whatsapp').value.trim(),
+    igreja:document.getElementById('igreja').value.trim(),
+    funcao:document.getElementById('funcao').value.trim(),
+    filiada:filiada==='sim'?'Sim':'Não',
+    temas:selectedThemes.join(', '),
+    sediar:sediar==='sim'?'Sim':'Estou me planejando',
+    timestamp:new Date().toLocaleString('pt-BR')
+  };
+
+  document.getElementById('step2').classList.remove('visible');
+  document.getElementById('tab2').classList.remove('active');
+  document.getElementById('tab2').classList.add('done');
+  document.getElementById('loading').classList.add('visible');
+  window.scrollTo(0,0);
+
+  try{
+    await fetch(ENDPOINT,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  }catch(e){}
+
+  document.getElementById('loading').classList.remove('visible');
+
+  /* Preenche tela de sucesso */
+  document.getElementById('s-nome-display').textContent=payload.nome+' — '+payload.funcao+' · '+payload.igreja;
+  const tc=document.getElementById('s-themes-display');
+  tc.innerHTML='';
+  selectedThemes.forEach(t=>{
+    const tag=document.createElement('div');
+    tag.className='s-tag';tag.textContent=t;tc.appendChild(tag);
   });
 
-  function showErr(id, s){ document.getElementById(id).classList.toggle('show',s); }
-  function setErr(id, s){ document.getElementById(id).classList.toggle('error',s); }
+  document.getElementById('success').classList.add('visible');
+  window.scrollTo(0,0);
 
-  function selectFiliada(v){
-    filiada=v;
-    document.getElementById('r-sim').classList.toggle('selected',v==='sim');
-    document.getElementById('r-nao').classList.toggle('selected',v==='nao');
-    showErr('err-filiada',false);
-  }
-  function selectSediar(v){
-    sediar=v;
-    document.getElementById('s-sim').classList.toggle('selected',v==='sim');
-    document.getElementById('s-nao').classList.toggle('selected',v==='nao');
-    showErr('err-sediar',false);
-  }
-
-  function goStep2(){
-    let ok=true;
-    const nome=document.getElementById('nome').value.trim();
-    const wp=document.getElementById('whatsapp').value.replace(/\D/g,'');
-    const ig=document.getElementById('igreja').value.trim();
-    const fn=document.getElementById('funcao').value.trim();
-    if(!nome){setErr('nome',true);showErr('err-nome',true);ok=false;}else{setErr('nome',false);showErr('err-nome',false);}
-    if(wp.length<10){setErr('whatsapp',true);showErr('err-whatsapp',true);ok=false;}else{setErr('whatsapp',false);showErr('err-whatsapp',false);}
-    if(!ig){setErr('igreja',true);showErr('err-igreja',true);ok=false;}else{setErr('igreja',false);showErr('err-igreja',false);}
-    if(!fn){setErr('funcao',true);showErr('err-funcao',true);ok=false;}else{setErr('funcao',false);showErr('err-funcao',false);}
-    if(!filiada){showErr('err-filiada',true);ok=false;}else{showErr('err-filiada',false);}
-    if(!ok)return;
-    document.getElementById('step1').classList.remove('visible');
-    document.getElementById('step2').classList.add('visible');
-    document.getElementById('tab1').classList.remove('active');
-    document.getElementById('tab1').classList.add('done');
-    document.getElementById('tab2').classList.add('active');
-    window.scrollTo(0,0);
-    loadChart();
-  }
-
-  function backStep1(){
-    document.getElementById('step2').classList.remove('visible');
-    document.getElementById('step1').classList.add('visible');
-    document.getElementById('tab2').classList.remove('active');
-    document.getElementById('tab1').classList.remove('done');
-    document.getElementById('tab1').classList.add('active');
-    window.scrollTo(0,0);
-  }
-
-  function toggleTheme(el){
-    if(el.classList.contains('disabled')&&!el.classList.contains('selected'))return;
-    if(el.classList.contains('selected')){
-      el.classList.remove('selected');
-      selectedThemes=selectedThemes.filter(t=>t!==el.dataset.theme);
-    }else{
-      if(selectedThemes.length>=5)return;
-      el.classList.add('selected');
-      selectedThemes.push(el.dataset.theme);
-    }
-    document.getElementById('count').textContent=selectedThemes.length;
-    document.querySelectorAll('.theme-opt').forEach(o=>{
-      if(!o.classList.contains('selected')) o.classList.toggle('disabled',selectedThemes.length>=5);
-    });
-    if(selectedThemes.length>0) document.getElementById('err-themes').classList.remove('show');
-  }
-
-  // Load chart from Apps Script GET endpoint
-  async function loadChart(){
-    document.getElementById('chart-loading').style.display='block';
-    document.getElementById('chart-wrap').style.display='none';
-    try {
-      const res = await fetch(ENDPOINT + '?action=votos');
-      const data = await res.json();
-      renderChart(data);
-    } catch(e) {
-      document.getElementById('chart-loading').textContent='Não foi possível carregar os dados. Tente atualizar.';
-    }
-  }
-
-  function renderChart(data){
-    document.getElementById('chart-loading').style.display='none';
-    document.getElementById('chart-wrap').style.display='block';
-
-    // Sort descending, take top 15
-    const sorted = Object.entries(data).sort((a,b)=>b[1]-a[1]).slice(0,15);
-    const labels = sorted.map(x=>x[0]);
-    const values = sorted.map(x=>x[1]);
-
-    const colors = labels.map((_,i)=>{
-      const palette = ['#E8E219','#00C0F3','#ffffff','#E8E219','#00C0F3','#aaaaaa'];
-      return palette[i % palette.length];
-    });
-
-    const ctx = document.getElementById('votacaoChart').getContext('2d');
-    if(chartInstance){ chartInstance.destroy(); }
-
-    chartInstance = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: labels,
-        datasets:[{
-          data: values,
-          backgroundColor: colors,
-          borderColor: colors,
-          borderWidth: 0,
-          borderRadius: 6,
-          borderSkipped: false,
-        }]
-      },
-      options:{
-        indexAxis: 'y',
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins:{
-          legend:{ display:false },
-          tooltip:{
-            backgroundColor:'#1a1a1a',
-            titleColor:'#E8E219',
-            bodyColor:'#fff',
-            borderColor:'rgba(255,255,255,0.1)',
-            borderWidth:1,
-            callbacks:{
-              label: ctx => ' ' + ctx.raw + ' voto' + (ctx.raw===1?'':'s')
-            }
-          }
-        },
-        scales:{
-          x:{
-            grid:{ color:'rgba(255,255,255,0.05)' },
-            ticks:{ color:'#aaa', font:{ size:11 }, stepSize:1 },
-            border:{ color:'rgba(255,255,255,0.1)' }
-          },
-          y:{
-            grid:{ display:false },
-            ticks:{ color:'#fff', font:{ size:11, weight:'bold' } },
-            border:{ color:'rgba(255,255,255,0.1)' }
-          }
-        }
-      }
-    });
-
-    // Set canvas height dynamically
-    document.getElementById('votacaoChart').style.height = (labels.length * 38 + 20) + 'px';
-    document.getElementById('chart-wrap').style.height = (labels.length * 38 + 20) + 'px';
-    chartInstance.resize();
-  }
-
-  async function enviar(){
-    let ok=true;
-    if(selectedThemes.length===0){document.getElementById('err-themes').classList.add('show');ok=false;}else{document.getElementById('err-themes').classList.remove('show');}
-    if(!sediar){showErr('err-sediar',true);ok=false;}else{showErr('err-sediar',false);}
-    if(!ok)return;
-
-    const payload={
-      nome: document.getElementById('nome').value.trim(),
-      whatsapp: document.getElementById('whatsapp').value.trim(),
-      igreja: document.getElementById('igreja').value.trim(),
-      funcao: document.getElementById('funcao').value.trim(),
-      filiada: filiada==='sim'?'Sim':'Não',
-      temas: selectedThemes.join(', '),
-      sediar: sediar==='sim'?'Sim':'Estou me planejando',
-      timestamp: new Date().toLocaleString('pt-BR')
-    };
-
-    document.getElementById('step2').classList.remove('visible');
-    document.getElementById('loading').classList.add('visible');
-    document.getElementById('tab2').classList.remove('active');
-    document.getElementById('tab2').classList.add('done');
-    window.scrollTo(0,0);
-
-    try{
-      await fetch(ENDPOINT,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-    }catch(e){}
-
-    document.getElementById('loading').classList.remove('visible');
-    document.getElementById('s-nome-display').textContent=payload.nome+' — '+payload.funcao+' · '+payload.igreja;
-    const tc=document.getElementById('s-themes-display');
-    tc.innerHTML='';
-    selectedThemes.forEach(t=>{
-      const tag=document.createElement('div');
-      tag.className='s-tag';
-      tag.textContent=t;
-      tc.appendChild(tag);
-    });
-    document.getElementById('success').classList.add('visible');
-    window.scrollTo(0,0);
-  }
+  /* Carrega gráfico automaticamente após envio */
+  setTimeout(()=>loadChart('s-chart','s-chart-loading'),400);
+}
 </script>
 </body>
 </html>
