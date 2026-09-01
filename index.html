@@ -11,7 +11,7 @@
 body{font-family:'Arial Black',Arial,sans-serif;background:#0a0a0a;color:#fff;min-height:100vh;}
 
 /* ── WRAPPER CENTRALIZADO ── */
-.page-wrap{max-width:600px;margin:0 auto;}
+.page-wrap{max-width:600px;margin:0 auto;position:relative;}
 
 .header{background:#0a0a0a;position:relative;overflow:hidden;padding:0;}
 .header::after{content:'';position:absolute;top:0;right:0;width:0;height:0;border-style:solid;border-width:0 160px 120px 0;border-color:transparent #00C0F3 transparent transparent;}
@@ -154,10 +154,11 @@ textarea.field{resize:vertical;min-height:70px;line-height:1.5;}
 .aviso.alerta{background:rgba(232,226,25,0.08);border:1.5px solid rgba(232,226,25,0.35);color:#f0eeb0;}
 .aviso.erro{background:rgba(232,58,58,0.08);border:1.5px solid rgba(232,58,58,0.35);color:#f4bcbc;}
 
-/* ── ACESSO ADMIN ── */
-.admin-access{text-align:center;padding:22px 0 30px;}
-.admin-access button{background:none;border:none;color:#2e2e2e;font-size:10px;letter-spacing:2px;font-family:'Arial Black',Arial;cursor:pointer;transition:color .18s;}
-.admin-access button:hover{color:#00C0F3;}
+/* ── ACESSO ADMIN (canto superior direito) ── */
+.admin-access{position:absolute;top:10px;right:10px;z-index:6;}
+.admin-access button{width:32px;height:32px;border-radius:50%;background:rgba(10,10,10,0.55);border:1px solid rgba(255,255,255,0.25);color:#fff;font-size:14px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .18s;padding:0;}
+.admin-access button:hover{background:#0a0a0a;border-color:#E8E219;color:#E8E219;}
+.admin-access button:focus-visible{outline:2px solid #E8E219;outline-offset:2px;}
 
 /* ── ADMIN ── */
 .admin-screen{display:none;padding:24px;}
@@ -234,6 +235,11 @@ tr:hover td{background:rgba(255,255,255,0.02);}
 <body>
 
 <div class="page-wrap">
+
+<!-- ACESSO ADMIN -->
+<div class="admin-access" id="admin-access">
+  <button onclick="abrirAdmin()" title="Área do administrador" aria-label="Área do administrador">⚙</button>
+</div>
 
 <!-- HEADER -->
 <div class="header">
@@ -402,9 +408,13 @@ tr:hover td{background:rgba(255,255,255,0.02);}
   <div class="login-box">
     <div class="login-title">Área do administrador</div>
     <div class="login-sub">Entre para configurar o encontro, os temas em votação e acompanhar os inscritos.</div>
+    <input class="field" id="adm-usuario" type="text" placeholder="Usuário" autocomplete="username"
+           autocapitalize="none" spellcheck="false"
+           onkeydown="if(event.key==='Enter')document.getElementById('adm-senha').focus()">
+    <div style="height:10px;"></div>
     <input class="field" id="adm-senha" type="password" placeholder="Senha" autocomplete="current-password"
            onkeydown="if(event.key==='Enter')fazerLogin()">
-    <div class="err-msg" id="err-senha">Senha incorreta. Tente novamente.</div>
+    <div class="err-msg" id="err-senha">Usuário ou senha incorretos. Tente novamente.</div>
     <div style="height:14px;"></div>
     <button class="btn-full" id="btn-login" onclick="fazerLogin()">Entrar</button>
     <div style="height:10px;"></div>
@@ -424,7 +434,7 @@ tr:hover td{background:rgba(255,255,255,0.02);}
     <button class="atab" onclick="abrirAba('temas',this)">TEMAS</button>
     <button class="atab" onclick="abrirAba('inscritos',this)">INSCRITOS</button>
     <button class="atab" onclick="abrirAba('arquivo',this)">ARQUIVO</button>
-    <button class="atab" onclick="abrirAba('conta',this)">CONTA</button>
+    <button class="atab" onclick="abrirAba('conta',this)">ACESSOS</button>
   </div>
 
   <!-- ABA: ENCONTRO -->
@@ -550,27 +560,46 @@ tr:hover td{background:rgba(255,255,255,0.02);}
     </div>
   </div>
 
-  <!-- ABA: CONTA -->
+  <!-- ABA: ACESSOS -->
   <div class="apane" id="pane-conta">
     <div class="card">
-      <div class="card-title">TROCAR A SENHA</div>
+      <div class="card-title">QUEM TEM ACESSO</div>
+      <div id="lista-admins"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">CADASTRAR UM ADMINISTRADOR</div>
+      <div class="grid2">
+        <div>
+          <div class="mini-label">USUÁRIO</div>
+          <input class="field" id="a-usuario" placeholder="ex.: pr.joao" autocapitalize="none" spellcheck="false">
+        </div>
+        <div>
+          <div class="mini-label">NOME</div>
+          <input class="field" id="a-nome" placeholder="Pr. João Silva">
+        </div>
+      </div>
+      <div class="hint">Só letras minúsculas, números, ponto, hífen ou sublinhado. Sem espaços nem acentos.</div>
+      <div class="mini-label">SENHA</div>
+      <input class="field" id="a-senha" type="password" placeholder="Mínimo de 6 caracteres">
+      <div class="mini-label">REPITA A SENHA</div>
+      <input class="field" id="a-senha2" type="password" placeholder="Repita a senha">
+      <div style="height:14px;"></div>
+      <button class="btn-full sec" onclick="cadastrarAdmin()">Cadastrar administrador</button>
+      <div class="hint">Combine a senha com a pessoa por um canal seguro. Ela pode trocá-la depois aqui mesmo.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">TROCAR A MINHA SENHA</div>
+      <div class="hint" style="margin-top:0;margin-bottom:10px;">Você está conectado como <b id="c-eu" style="color:#E8E219;"></b>.</div>
       <div class="mini-label">NOVA SENHA</div>
-      <input class="field" id="c-senha" type="password" placeholder="Mínimo de 4 caracteres">
+      <input class="field" id="c-senha" type="password" placeholder="Mínimo de 6 caracteres">
       <div class="mini-label">REPITA A NOVA SENHA</div>
       <input class="field" id="c-senha2" type="password" placeholder="Repita a senha">
       <div style="height:14px;"></div>
       <button class="btn-full" onclick="trocarSenha()">Salvar nova senha</button>
     </div>
-    <div class="card">
-      <div class="card-title">LINK DO FORMULÁRIO</div>
-      <div class="hint" style="margin-top:0;">Compartilhe o endereço desta página com os pastores. A área administrativa fica escondida atrás do botão no rodapé.</div>
-    </div>
   </div>
-</div>
-
-<!-- ACESSO ADMIN -->
-<div class="admin-access" id="admin-access">
-  <button onclick="abrirAdmin()">⚙ ÁREA DO ADMINISTRADOR</button>
 </div>
 
 </div><!-- /page-wrap -->
@@ -584,8 +613,10 @@ let selectedThemes = [], filiada = '', sediar = '';
 let MAX_VOTOS = 5;
 const chartInstances = {};
 
-let SENHA = '';                       // guardada só em memória, some ao recarregar
-let EVENTOS = [], CATALOGO = [], SELECAO = [], INSCRITOS = [], VOTOS = {};
+let AUTH = null;                      // {usuario, senha} — só em memória, some ao recarregar
+let EVENTOS = [], CATALOGO = [], SELECAO = [], INSCRITOS = [], VOTOS = {}, ADMINS = [];
+
+function cred(extra){ return Object.assign({usuario:AUTH.usuario, senha:AUTH.senha}, extra||{}); }
 
 /* ══════════ API ══════════ */
 async function apiGet(action, params){
@@ -940,7 +971,7 @@ function abrirAdmin(){
   $('steps-bar').style.display='none';
   $('evento-bar').style.display='none';
   $('admin-access').style.display='none';
-  $(SENHA ? 'admin-panel' : 'admin-login').classList.add('visible');
+  $(AUTH ? 'admin-panel' : 'admin-login').classList.add('visible');
   window.scrollTo(0,0);
 }
 
@@ -955,21 +986,22 @@ function voltarPublico(){
 }
 
 function sairAdmin(){
-  SENHA=''; EVENTOS=[]; CATALOGO=[]; SELECAO=[]; INSCRITOS=[];
+  AUTH=null; EVENTOS=[]; CATALOGO=[]; SELECAO=[]; INSCRITOS=[]; ADMINS=[];
   $('adm-senha').value='';
   voltarPublico();
 }
 
 async function fazerLogin(){
+  const usuario=$('adm-usuario').value.trim().toLowerCase();
   const senha=$('adm-senha').value;
-  if(!senha) return;
+  if(!usuario || !senha){ showErr('err-senha',true); return; }
   const btn=$('btn-login');
   btn.disabled=true; btn.textContent='Entrando...';
   try{
-    const r=await apiGet('admin',{senha});
+    const r=await apiGet('admin',{usuario, senha});
     if(!r.ok){ showErr('err-senha',true); return; }
     showErr('err-senha',false);
-    SENHA=senha;
+    AUTH={usuario, senha};
     receberPainel(r);
     allOff();
     $('admin-panel').classList.add('visible');
@@ -982,7 +1014,7 @@ async function fazerLogin(){
 }
 
 async function recarregarPainel(){
-  const r=await apiGet('admin',{senha:SENHA});
+  const r=await apiGet('admin', cred());
   if(r.ok) receberPainel(r);
 }
 
@@ -1008,9 +1040,13 @@ function receberPainel(r){
   const cats=[...new Set(CATALOGO.map(t=>t.categoria))];
   $('cats').innerHTML = cats.map(c=>'<option value="'+esc(c)+'">').join('');
 
+  ADMINS = r.admins || [];
+  $('c-eu').textContent = (AUTH && AUTH.usuario) || '';
+
   renderTemasAdmin();
   renderSelectEventos();
   renderArquivo();
+  renderAdmins();
 }
 
 function eventoAtivo(){ return EVENTOS.filter(e=>e.status==='ativo')[0] || null; }
@@ -1029,7 +1065,8 @@ async function salvarEvento(){
   const ev=eventoAtivo();
   if(!ev) return toast('Nenhum encontro ativo.', true);
   const r=await apiPost({
-    tipo:'salvarEvento', senha:SENHA, id:ev.id,
+    tipo:'salvarEvento', id:ev.id,
+    usuario:AUTH.usuario, senha:AUTH.senha,
     titulo:$('e-titulo').value.trim(),
     data:$('e-data').value,
     hora:$('e-hora').value,
@@ -1047,7 +1084,7 @@ async function alternarInscricoes(){
   const novo = !$('sw-insc').classList.contains('on');
   $('sw-insc').classList.toggle('on', novo);
   $('txt-insc').textContent = novo ? 'As inscrições estão abertas.' : 'As inscrições estão fechadas.';
-  const r=await apiPost({tipo:'salvarEvento', senha:SENHA, id:ev.id, inscricoesAbertas:novo});
+  const r=await apiPost(cred({tipo:'salvarEvento', id:ev.id, inscricoesAbertas:novo}));
   if(r.ok){ toast(novo?'Inscrições abertas':'Inscrições fechadas'); await recarregarPainel(); }
   else toast(r.erro||'Não deu para salvar.', true);
 }
@@ -1056,7 +1093,7 @@ async function criarNovoEvento(){
   const titulo=$('n-titulo').value.trim() || 'Café com Pastores';
   if(!confirm('O encontro atual vai para o arquivo e um novo começa do zero. Confirma?')) return;
   const r=await apiPost({
-    tipo:'novoEvento', senha:SENHA,
+    tipo:'novoEvento', usuario:AUTH.usuario, senha:AUTH.senha,
     titulo, data:$('n-data').value, hora:$('n-hora').value,
     local:$('n-local').value.trim(),
     participantes:$('n-part').value.trim(),
@@ -1123,8 +1160,8 @@ async function adicionarTema(){
   const tema=$('t-nome').value.trim();
   const cat=$('t-cat').value.trim() || 'Outros';
   if(!tema) return toast('Escreva o nome do tema.', true);
-  const r=await apiPost({tipo:'addTema', senha:SENHA, tema, categoria:cat,
-                         rotulo:tema, subtitulo:$('t-sub').value.trim()||cat});
+  const r=await apiPost(cred({tipo:'addTema', tema, categoria:cat,
+                         rotulo:tema, subtitulo:$('t-sub').value.trim()||cat}));
   if(r.ok){
     SELECAO.push(tema);
     $('t-nome').value=''; $('t-sub').value='';
@@ -1135,7 +1172,7 @@ async function adicionarTema(){
 
 async function removerTema(tema){
   if(!confirm('Remover "'+tema+'" do catálogo? Os votos já registrados continuam guardados.')) return;
-  const r=await apiPost({tipo:'removerTema', senha:SENHA, tema});
+  const r=await apiPost(cred({tipo:'removerTema', tema}));
   if(r.ok){
     SELECAO = SELECAO.filter(t=>t!==tema);
     toast('Tema removido');
@@ -1147,7 +1184,7 @@ async function salvarTemasEvento(){
   const ev=eventoAtivo();
   if(!ev) return toast('Nenhum encontro ativo.', true);
   if(!SELECAO.length) return toast('Marque pelo menos um tema.', true);
-  const r=await apiPost({tipo:'salvarEvento', senha:SENHA, id:ev.id, temas:SELECAO});
+  const r=await apiPost(cred({tipo:'salvarEvento', id:ev.id, temas:SELECAO}));
   if(r.ok){
     toast('Temas em votação atualizados');
     await recarregarPainel();
@@ -1171,7 +1208,7 @@ async function carregarInscritos(){
   const id=$('i-evento').value;
   if(!id) return;
   $('tabela-inscritos').innerHTML='<div class="chart-loading">Carregando...</div>';
-  const r=await apiGet('inscritos',{senha:SENHA, evento:id});
+  const r=await apiGet('inscritos', cred({evento:id}));
   if(!r.ok){ toast(r.erro||'Não deu para carregar.', true); return; }
 
   INSCRITOS=r.inscritos||[];
@@ -1261,13 +1298,50 @@ function verArquivo(id){
   window.scrollTo(0,0);
 }
 
-/* ── Conta ── */
+/* ── Acessos ── */
+function renderAdmins(){
+  $('lista-admins').innerHTML = ADMINS.map(a=>{
+    const eu = a.usuario === (AUTH && AUTH.usuario);
+    return '<div class="ev-item"><div class="ev-item-info">' +
+      '<div class="ev-item-nome">'+esc(a.nome||a.usuario)+'</div>' +
+      '<div class="ev-item-meta">' +
+        (eu?'<span class="badge ativo">VOCÊ</span>':'') +
+        esc(a.usuario) + (a.criadoEm ? ' · desde '+esc(a.criadoEm) : '') +
+      '</div></div>' +
+      (eu ? '' : '<button class="btn-mini x" onclick="removerAdmin(\''+esc(a.usuario)+'\')">REMOVER</button>') +
+    '</div>';
+  }).join('');
+}
+
+async function cadastrarAdmin(){
+  const usuario=$('a-usuario').value.trim().toLowerCase();
+  const nome=$('a-nome').value.trim();
+  const s1=$('a-senha').value, s2=$('a-senha2').value;
+  if(!usuario) return toast('Escolha um usuário.', true);
+  if(s1.length<6) return toast('A senha precisa ter pelo menos 6 caracteres.', true);
+  if(s1!==s2) return toast('As duas senhas não são iguais.', true);
+
+  const r=await apiPost(cred({tipo:'addAdmin', novoUsuario:usuario, novoNome:nome, novaSenha:s1}));
+  if(r.ok){
+    ['a-usuario','a-nome','a-senha','a-senha2'].forEach(id=>$(id).value='');
+    toast('Administrador cadastrado');
+    await recarregarPainel();
+  }else toast(r.erro||'Não deu para cadastrar.', true);
+}
+
+async function removerAdmin(usuario){
+  if(!confirm('Remover o acesso de "'+usuario+'"? A pessoa deixa de conseguir entrar no painel.')) return;
+  const r=await apiPost(cred({tipo:'removerAdmin', alvo:usuario}));
+  if(r.ok){ toast('Acesso removido'); await recarregarPainel(); }
+  else toast(r.erro||'Não deu para remover.', true);
+}
+
 async function trocarSenha(){
   const a=$('c-senha').value, b=$('c-senha2').value;
-  if(a.length<4) return toast('A senha precisa ter pelo menos 4 caracteres.', true);
+  if(a.length<6) return toast('A senha precisa ter pelo menos 6 caracteres.', true);
   if(a!==b) return toast('As duas senhas não são iguais.', true);
-  const r=await apiPost({tipo:'alterarSenha', senha:SENHA, novaSenha:a});
-  if(r.ok){ SENHA=a; $('c-senha').value=''; $('c-senha2').value=''; toast('Senha alterada'); }
+  const r=await apiPost(cred({tipo:'alterarSenha', novaSenha:a}));
+  if(r.ok){ AUTH.senha=a; $('c-senha').value=''; $('c-senha2').value=''; toast('Senha alterada'); }
   else toast(r.erro||'Não deu para alterar.', true);
 }
 </script>
