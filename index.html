@@ -590,7 +590,8 @@ tr:hover td{background:rgba(255,255,255,0.02);}
 </div><!-- /page-wrap -->
 
 <script>
-const ENDPOINT = 'https://script.google.com/macros/s/AKfycbyaNJ4nJSRlLUhKqu0dU3p9GiAyExbp9aFmXGnw23JNxpwFQ9x4A4wiE26NdZG4dZ_r5w/exec';
+const ENDPOINT = 'https://ymztnkbaerfjcchvllbo.supabase.co/functions/v1/api';
+const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InltenRua2JhZXJmamNjaHZsbGJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyODAwMjksImV4cCI6MjEwMzg1NjAyOX0.SfZbb6OrNwGq6vjLn86nrwiiFv7ptfkjmqBqA95TaiY';
 const SEP = ' | ';
 
 let CFG = null;                       // configuração pública do encontro ativo
@@ -604,22 +605,27 @@ let EVENTOS = [], CATALOGO = [], SELECAO = [], INSCRITOS = [], VOTOS = {}, ADMIN
 function cred(extra){ return Object.assign({usuario:AUTH.usuario, senha:AUTH.senha}, extra||{}); }
 
 /* ══════════ API ══════════ */
-async function apiGet(action, params){
-  const qs = new URLSearchParams(Object.assign({action}, params||{})).toString();
-  const r = await fetch(ENDPOINT + '?' + qs);
-  return r.json();
-}
-async function apiPost(payload){
+// Tudo é POST para a Edge Function: as credenciais do admin nunca vão
+// na URL, e a chave anon só autoriza a chamada — não dá acesso às tabelas.
+async function api(action, payload){
   try{
-    // sem header Content-Type: vira text/plain e não dispara preflight
-    const r = await fetch(ENDPOINT, {method:'POST', body:JSON.stringify(payload)});
+    const r = await fetch(ENDPOINT, {
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'Authorization':'Bearer '+ANON_KEY,
+        'apikey': ANON_KEY
+      },
+      body: JSON.stringify(Object.assign({action}, payload||{}))
+    });
     return await r.json();
   }catch(e){
-    // rede bloqueou a leitura da resposta: envia às cegas para não perder o dado
-    try{ await fetch(ENDPOINT,{method:'POST',mode:'no-cors',body:JSON.stringify(payload)}); }catch(_){}
-    return {ok:true, semResposta:true};
+    return {ok:false, erro:'Sem conexão com o servidor. Verifique a internet e tente de novo.'};
   }
 }
+
+const apiGet  = (action, params) => api(action, params);
+const apiPost = (payload) => { const p = Object.assign({}, payload); const t = p.tipo; delete p.tipo; return api(t, p); };
 
 /* ══════════ Utilidades ══════════ */
 function $(id){ return document.getElementById(id); }
@@ -690,8 +696,9 @@ async function boot(){
   if(!CFG || !CFG.ok){
     $('form-inscricao').style.display='none';
     $('barra-step1').style.display='none';
-    $('aviso-topo').innerHTML =
-      '<div class="aviso alerta">Nenhum encontro aberto no momento. Assim que a próxima edição for marcada, as inscrições aparecem aqui.</div>';
+    $('aviso-topo').innerHTML = CFG && CFG.erro
+      ? '<div class="aviso erro">'+esc(CFG.erro)+'</div>'
+      : '<div class="aviso alerta">Nenhum encontro aberto no momento. Assim que a próxima edição for marcada, as inscrições aparecem aqui.</div>';
     if(location.hash==='#admin') abrirAdmin();
     return;
   }
@@ -915,7 +922,7 @@ async function enviar(){
     igreja:$('igreja').value.trim(),
     funcao:$('funcao').value.trim(),
     filiada: filiada==='sim' ? 'Sim' : 'Não',
-    temas: selectedThemes.join(SEP),
+    temas: selectedThemes.slice(),
     sediar: sediar==='sim' ? 'Sim' : 'Estou me planejando',
     timestamp:new Date().toLocaleString('pt-BR')
   };
@@ -955,7 +962,6 @@ async function enviar(){
 function abrirAdmin(){
   allOff();
   $('steps-bar').style.display='none';
-  $('evento-bar').style.display='none';
   $('admin-access').style.display='none';
   $(AUTH ? 'admin-panel' : 'admin-login').classList.add('visible');
   window.scrollTo(0,0);
@@ -964,7 +970,7 @@ function abrirAdmin(){
 function voltarPublico(){
   allOff();
   $('steps-bar').style.display='flex';
-  if(CFG && CFG.ok) $('evento-bar').style.display='block';
+  if(CFG && CFG.ok) pintarEvento(CFG.evento);
   $('admin-access').style.display='block';
   $('step1').classList.add('visible');
   if(location.hash) history.replaceState(null,'',location.pathname+location.search);
@@ -985,7 +991,11 @@ async function fazerLogin(){
   btn.disabled=true; btn.textContent='Entrando...';
   try{
     const r=await apiGet('admin',{usuario, senha});
-    if(!r.ok){ showErr('err-senha',true); return; }
+    if(!r.ok){
+      if(r.erro && r.erro.indexOf('incorret')<0) toast(r.erro, true);
+      else showErr('err-senha',true);
+      return;
+    }
     showErr('err-senha',false);
     AUTH={usuario, senha};
     receberPainel(r);
@@ -1047,6 +1057,21 @@ function abrirAba(nome, botao){
 }
 
 /* ── Encontro ── */
+// Recarrega a configuração pública e repinta o topo da página,
+// para o admin ver na hora o que os pastores vão ver.
+async function atualizarPublico(){
+  try{
+    CFG = await apiGet('config');
+    if(CFG && CFG.ok){
+      MAX_VOTOS = CFG.evento.maxVotos || 5;
+      $('max-txt').textContent = MAX_VOTOS;
+      $('max-num').textContent = MAX_VOTOS;
+      pintarEvento(CFG.evento);
+      renderTemasPublico(CFG.temas);
+    }
+  }catch(e){}
+}
+
 async function salvarEvento(){
   const ev=eventoAtivo();
   if(!ev) return toast('Nenhum encontro ativo.', true);
@@ -1060,7 +1085,7 @@ async function salvarEvento(){
     participantes:$('e-part').value.trim(),
     maxVotos:$('e-max').value
   });
-  if(r.ok){ toast('Alterações salvas'); await recarregarPainel(); }
+  if(r.ok){ toast('Alterações salvas'); await recarregarPainel(); await atualizarPublico(); }
   else toast(r.erro||'Não deu para salvar.', true);
 }
 
@@ -1071,7 +1096,7 @@ async function alternarInscricoes(){
   $('sw-insc').classList.toggle('on', novo);
   $('txt-insc').textContent = novo ? 'As inscrições estão abertas.' : 'As inscrições estão fechadas.';
   const r=await apiPost(cred({tipo:'salvarEvento', id:ev.id, inscricoesAbertas:novo}));
-  if(r.ok){ toast(novo?'Inscrições abertas':'Inscrições fechadas'); await recarregarPainel(); }
+  if(r.ok){ toast(novo?'Inscrições abertas':'Inscrições fechadas'); await recarregarPainel(); await atualizarPublico(); }
   else toast(r.erro||'Não deu para salvar.', true);
 }
 
@@ -1086,10 +1111,9 @@ async function criarNovoEvento(){
   }));
   if(r.ok){
     toast('Novo ciclo aberto — preencha a data do próximo encontro');
-    await recarregarPainel();
     INSCRITOS=[];
-    CFG = await apiGet('config');
-    if(CFG.ok){ MAX_VOTOS=CFG.evento.maxVotos; pintarEvento(CFG.evento); renderTemasPublico(CFG.temas); }
+    await recarregarPainel();
+    await atualizarPublico();
   }else toast(r.erro||'Não deu para criar.', true);
 }
 
@@ -1171,8 +1195,7 @@ async function salvarTemasEvento(){
   if(r.ok){
     toast('Temas em votação atualizados');
     await recarregarPainel();
-    CFG = await apiGet('config');
-    if(CFG.ok) renderTemasPublico(CFG.temas);
+    await atualizarPublico();
   }else toast(r.erro||'Não deu para salvar.', true);
 }
 
